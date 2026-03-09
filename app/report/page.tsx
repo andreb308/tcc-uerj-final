@@ -2,6 +2,8 @@
 
 import {
   ArrowLeftIcon,
+  ArrowRightIcon,
+  ChatCircleDotsIcon,
   FingerprintIcon,
   PrinterIcon,
   ScrollIcon,
@@ -31,10 +33,28 @@ export default function ReportPage() {
                 </span>
               </div>
             </div>
-            <h1 className="font-display text-5xl md:text-7xl font-bold uppercase leading-[0.9] tracking-tighter">
-              u // <br />
-              Kendrick Lamar
-            </h1>
+            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+              <h1 className="font-display text-5xl md:text-7xl font-bold uppercase leading-[0.9] tracking-tighter">
+                u // <br />
+                Kendrick Lamar
+              </h1>
+              <Link
+                href="/chat"
+                className="print:hidden group inline-flex shrink-0 items-center gap-3 border-2 border-foreground bg-primary px-8 py-5 font-display text-base font-bold uppercase tracking-[2.5px] text-primary-foreground transition-all duration-150 hover:bg-background hover:text-foreground hover:shadow-[4px_4px_0px_0px_black]"
+              >
+                <ChatCircleDotsIcon
+                  className="size-6 transition-transform duration-150 group-hover:scale-110"
+                  weight="bold"
+                  aria-hidden="true"
+                />
+                Start Conversation
+                <ArrowRightIcon
+                  className="size-5 transition-transform duration-150 group-hover:translate-x-1"
+                  weight="bold"
+                  aria-hidden="true"
+                />
+              </Link>
+            </div>
             <div className="flex flex-wrap gap-y-2 gap-x-8 font-mono text-xs md:text-sm pt-2">
               <div>
                 <span className="text-muted-foreground">ALBUM:</span> TO PIMP A BUTTERFLY (2015)
@@ -221,7 +241,7 @@ export default function ReportPage() {
           <div className="h-full w-1/4 bg-paper-dim"></div>
         </div>
       </div>
-      <div className="mt-8 mb-12 text-center no-print">
+      <div className="mt-8 mb-12 text-center print:hidden">
         <Link
           href="/index"
           className="inline-flex items-center gap-2 text-sm font-mono hover:underline hover:text-alert transition-colors"

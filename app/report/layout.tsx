@@ -10,7 +10,7 @@ export default function ReportLayout({
 }>) {
   return (
     <div className="font-mono text-ink antialiased min-h-screen flex flex-col selection:bg-[#FFFF00] selection:text-ink bg-paper">
-      <header className="flex items-center justify-between border-b border-ink bg-paper px-6 py-3 no-print sticky top-0 z-50">
+      <header className="flex items-center justify-between border-b border-ink bg-paper px-6 py-3 print:hidden sticky top-0 z-50">
         <Link href="/" className="flex items-center gap-4 cursor-pointer">
           <div className="size-6 flex items-center justify-center bg-ink text-paper">
             <TerminalIcon className="h-4 w-4" aria-hidden="true" />
