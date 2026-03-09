@@ -12,11 +12,13 @@ export default function MainLayout({
     <div className="flex h-dvh flex-col bg-background">
       <Header />
 
-      <SidebarProvider className="flex flex-1 overflow-hidden">
+      <SidebarProvider className="flex min-h-0 flex-1 overflow-hidden">
         <AppSidebar />
 
-        <div className="flex flex-1 flex-col">
-          <main className="flex flex-1 items-center justify-center px-6">{children}</main>
+        <div className="flex min-h-0 flex-1 flex-col">
+          <main className="flex flex-1 items-center justify-center overflow-hidden px-6 py-6">
+            {children}
+          </main>
         </div>
       </SidebarProvider>
 

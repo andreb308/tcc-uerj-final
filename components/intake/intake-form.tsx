@@ -110,7 +110,7 @@ export function IntakeForm() {
         toast.success('Protocol executed successfully!');
         router.push('/report');
       }}
-      className="flex flex-col"
+      className="flex min-h-0 flex-1 flex-col"
     >
       {/* Artist ID */}
       <FormFieldRow label="Artist_ID" htmlFor="artist-id">
@@ -158,7 +158,7 @@ export function IntakeForm() {
       </FormFieldRow>
 
       {/* Artifact Data (Lyrics) */}
-      <div className="flex flex-col border-b border-border">
+      <div className="flex min-h-0 flex-1 flex-col border-b border-border">
         <div className="flex items-center justify-between border-b border-border bg-muted px-4 py-2">
           <Label
             htmlFor="artifact-data"
@@ -172,7 +172,7 @@ export function IntakeForm() {
         <Textarea
           id="artifact-data"
           placeholder={`PASTE ARTIFACT DATA HERE.\n> LINE 1\n> LINE 2\n> ...`}
-          className="min-h-[300px] border-0 bg-background text-sm placeholder:uppercase placeholder:text-muted-foreground/40 focus-visible:ring-0"
+          className="min-h-64 flex-1 resize-none border-0 bg-background text-sm placeholder:uppercase placeholder:text-muted-foreground/40 focus-visible:ring-0"
         />
       </div>
 

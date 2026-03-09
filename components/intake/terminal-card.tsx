@@ -10,7 +10,7 @@ export function TerminalCard({ title, children, className }: TerminalCardProps) 
   return (
     <div
       className={cn(
-        'w-full max-w-[600px] border border-border bg-background shadow-[8px_8px_0px_0px_black]',
+        'flex max-h-full w-full max-w-[600px] flex-col border border-border bg-background shadow-[8px_8px_0px_0px_black]',
         className
       )}
     >
@@ -25,7 +25,7 @@ export function TerminalCard({ title, children, className }: TerminalCardProps) 
       </div>
 
       {/* Card body */}
-      <div className="flex flex-col">{children}</div>
+      <div className="flex min-h-0 flex-1 flex-col">{children}</div>
     </div>
   );
 }
