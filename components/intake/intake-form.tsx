@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { LyricsModal, type LyricLine } from './lyrics-modal';
 
 interface FormFieldRowProps {
   label: string;
@@ -45,12 +46,23 @@ interface DiscogsArtist {
   title: string;
 }
 
+interface GeniusSong {
+  id: number;
+  title: string;
+  artist: string;
+  fullTitle: string;
+}
+
 export function IntakeForm() {
   const router = useRouter();
   const [artistInput, setArtistInput] = useState('');
   const [debouncedArtist, setDebouncedArtist] = useState('');
+  const [songInput, setSongInput] = useState('');
+  const [debouncedSong, setDebouncedSong] = useState('');
+  const [selectedSong, setSelectedSong] = useState<GeniusSong | null>(null);
+  const [artifactData, setArtifactData] = useState('');
 
-  // Update debounced value after 1 second of no typing
+  // Update debounced values after 1 second of no typing
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedArtist(artistInput);
@@ -58,7 +70,14 @@ export function IntakeForm() {
     return () => clearTimeout(timer);
   }, [artistInput]);
 
-  const { data: artistResults = [], isFetching } = useQuery({
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSong(songInput);
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [songInput]);
+
+  const { data: artistResults = [] } = useQuery({
     queryKey: ['artist-search', debouncedArtist],
     queryFn: async () => {
       if (!debouncedArtist) return [];
@@ -98,10 +117,38 @@ export function IntakeForm() {
         return a.title.localeCompare(b.title);
       });
     },
-    enabled: debouncedArtist.trim().length >= 4,
+    enabled: debouncedArtist.trim().length >= 1,
     // Add a refetchInterval if the strict requirement is to poll every second.
     // Assuming "every second without typing" means 1 second debounce.
   });
+
+  const { data: songResults = [] } = useQuery({
+    queryKey: ['song-search', debouncedSong],
+    queryFn: async () => {
+      if (!debouncedSong) return [];
+      const params = new URLSearchParams({ q: debouncedSong });
+      if (artistInput.trim()) params.set('artist', artistInput.trim());
+      const res = await fetch(`/api/songs/search?${params}`);
+      if (!res.ok) throw new Error('Failed to fetch');
+      const data = await res.json();
+      return (data.results || []) as GeniusSong[];
+    },
+    enabled: debouncedSong.trim().length >= 1,
+  });
+
+  const handleLyricsConfirm = (lines: LyricLine[]) => {
+    const formattedText = lines
+      .map((line) => {
+        let text = `[${line.number}] ${line.text}`;
+        if (line.annotation) {
+          text += `\n/* ${line.annotation} */`;
+        }
+        return text;
+      })
+      .join('\n\n');
+
+    setArtifactData((prev) => (prev ? `${prev}\n\n${formattedText}` : formattedText));
+  };
 
   return (
     <form
@@ -120,24 +167,51 @@ export function IntakeForm() {
           placeholder="ENTER_NAME..."
           value={artistInput}
           onChange={(e) => setArtistInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') e.preventDefault();
+          }}
           className="h-full w-full border-0 bg-transparent text-sm placeholder:uppercase placeholder:text-muted-foreground/50 focus-visible:ring-0"
         />
-        {(!isFetching || artistInput === debouncedArtist) && (
-          <datalist id="artist-suggestions">
-            {artistResults.map((artist: DiscogsArtist) => (
-              <option key={artist.id} value={artist.title} />
-            ))}
-          </datalist>
-        )}
+        <datalist id="artist-suggestions">
+          {artistResults.map((artist: DiscogsArtist) => (
+            <option key={artist.id} value={artist.title} />
+          ))}
+        </datalist>
       </FormFieldRow>
 
       {/* Track Title */}
       <FormFieldRow label="Track_Title" htmlFor="track-title">
         <Input
           id="track-title"
+          list="song-suggestions"
           placeholder="ENTER_TITLE..."
-          className="h-full border-0 bg-transparent text-sm placeholder:uppercase placeholder:text-muted-foreground/50 focus-visible:ring-0"
+          value={songInput}
+          onChange={(e) => {
+            const value = e.target.value;
+            setSongInput(value);
+            
+            // Check if user selected something from datalist
+            const song = songResults.find((s: GeniusSong) => s.title === value);
+            if (song) {
+              setSelectedSong(song);
+              setArtifactData('');
+            } else if (selectedSong && value !== selectedSong.title) {
+              setSelectedSong(null);
+              setArtifactData('');
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') e.preventDefault();
+          }}
+          className="h-full w-full border-0 bg-transparent text-sm placeholder:uppercase placeholder:text-muted-foreground/50 focus-visible:ring-0"
         />
+        <datalist id="song-suggestions">
+          {songResults.map((song: GeniusSong) => (
+            <option key={song.id} value={song.title}>
+              {song.title}
+            </option>
+          ))}
+        </datalist>
       </FormFieldRow>
 
       {/* Target Language */}
@@ -169,11 +243,49 @@ export function IntakeForm() {
           <span className="text-[10px] uppercase text-foreground/60">RAW_TEXT_ONLY</span>
         </div>
 
-        <Textarea
-          id="artifact-data"
-          placeholder={`PASTE ARTIFACT DATA HERE.\n> LINE 1\n> LINE 2\n> ...`}
-          className="min-h-64 flex-1 resize-none border-0 bg-background text-sm placeholder:uppercase placeholder:text-muted-foreground/40 focus-visible:ring-0"
-        />
+        {/* Action Row & Artifact Data Area */}
+        {artifactData ? (
+          <Textarea
+            id="artifact-data"
+            value={artifactData}
+            readOnly
+            className="min-h-64 flex-1 resize-none border-0 bg-background p-4 font-mono text-sm focus-visible:ring-0"
+          />
+        ) : (
+          <div className="flex min-h-64 flex-1 flex-col items-center justify-center bg-background p-6">
+            {selectedSong ? (
+              <div className="flex flex-col items-center gap-6">
+                <div className="flex flex-col items-center gap-2">
+                  <div className="flex items-center gap-2 text-destructive">
+                    <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
+                    <span className="font-mono text-xs font-bold uppercase tracking-widest">
+                      Target Acquired
+                    </span>
+                  </div>
+                  <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                    Protocol ready for extraction
+                  </span>
+                </div>
+                
+                <LyricsModal
+                  songId={selectedSong.id}
+                  songTitle={selectedSong.title}
+                  artistName={selectedSong.artist}
+                  onConfirm={handleLyricsConfirm}
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground/40">
+                <span className="font-mono text-sm uppercase tracking-widest">
+                  Awaiting Track Selection
+                </span>
+                <span className="font-mono text-[10px] uppercase">
+                  Input artist and title to proceed
+                </span>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Execute Button */}

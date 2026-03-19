@@ -8,11 +8,9 @@ function formatUtc(date: Date) {
 }
 
 export function Header() {
-  const [utcString, setUtcString] = useState<string | null>(null);
+  const [utcString, setUtcString] = useState(() => formatUtc(new Date()));
 
   useEffect(() => {
-    setUtcString(formatUtc(new Date()));
-
     const interval = setInterval(() => {
       setUtcString(formatUtc(new Date()));
     }, 1000);
@@ -29,8 +27,8 @@ export function Header() {
         </h1>
       </div>
 
-      <span className="text-sm tracking-wider text-foreground">
-        {utcString ? `UTC ${utcString}` : null}
+      <span className="text-sm tracking-wider text-foreground" suppressHydrationWarning>
+        UTC {utcString}
       </span>
     </header>
   );

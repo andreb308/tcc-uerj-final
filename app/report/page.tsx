@@ -15,7 +15,7 @@ import Link from 'next/link';
 
 export default function ReportPage() {
   return (
-    <main className="flex-grow flex flex-col w-full max-w-[1400px] mx-auto p-0 md:p-8 lg:p-12">
+    <main className="grow flex flex-col w-full max-w-[1400px] mx-auto p-0 md:p-8 lg:p-12">
       <div className="flex flex-col border border-ink bg-paper shadow-panel print:shadow-none print:border-2">
         <div className="border-b border-ink p-8 md:p-12 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
@@ -140,10 +140,10 @@ export default function ReportPage() {
             </div>
             <div className="p-4 border-t border-ink mt-auto">
               <div className="aspect-square border border-ink relative bg-white p-2">
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,#000000_1px,transparent_1px)] bg-[length:10px_10px] opacity-5"></div>
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,#000000_1px,transparent_1px)] bg-size-[10px_10px] opacity-5"></div>
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-full h-[1px] bg-ink/20"></div>
-                  <div className="h-full w-[1px] bg-ink/20 absolute"></div>
+                  <div className="w-full h-px bg-ink/20"></div>
+                  <div className="h-full w-px bg-ink/20 absolute"></div>
                 </div>
                 <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100">
                   <polygon
@@ -169,7 +169,7 @@ export default function ReportPage() {
             <div className="p-4 border-b border-ink bg-ink text-paper">
               <h3 className="font-display text-lg font-bold uppercase">03 // Idiom Decoder</h3>
             </div>
-            <div className="flex-grow overflow-hidden">
+            <div className="grow overflow-hidden">
               <table className="w-full text-sm text-left">
                 <thead className="text-xs text-muted-foreground uppercase bg-paper-dim border-b border-ink">
                   <tr>

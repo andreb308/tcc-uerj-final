@@ -1,11 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import {
-  ArrowLeft,
-  ArrowRight,
-  Lightning,
-} from '@phosphor-icons/react';
+import { ArrowLeftIcon, ArrowRightIcon, LightningIcon } from '@phosphor-icons/react';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,12 +9,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 // ---------- Types ----------
 interface LyricLine {
@@ -36,12 +27,24 @@ interface ChatMessage {
 
 // ---------- Sample data (matches Figma design) ----------
 const LYRICS: LyricLine[] = [
-  { number: '01', text: 'Loving you is complicated', translation: '[loving yourself is complicated]' },
+  {
+    number: '01',
+    text: 'Loving you is complicated',
+    translation: '[loving yourself is complicated]',
+  },
   { number: '02', text: 'Loving you is complicated' },
-  { number: '03', text: 'I place blame on you still', translation: '[I still blame you for everything]' },
+  {
+    number: '03',
+    text: 'I place blame on you still',
+    translation: '[I still blame you for everything]',
+  },
   { number: '04', text: 'Place shame on you still' },
   { number: '05', text: "Feel like you ain't shit" },
-  { number: '06', text: "Feel like you don't feel confidence in yourself", translation: '[Your confidence has been eroded]' },
+  {
+    number: '06',
+    text: "Feel like you don't feel confidence in yourself",
+    translation: '[Your confidence has been eroded]',
+  },
   { number: '07', text: "Breakin' on marble floors" },
   { number: '08', text: "Watchin' anonymous strangers" },
 ];
@@ -53,7 +56,8 @@ const MESSAGES: ChatMessage[] = [
   },
   {
     role: 'learner',
-    content: 'What does "place blame on you still" imply in this context? Is he talking about a specific event?',
+    content:
+      'What does "place blame on you still" imply in this context? Is he talking about a specific event?',
   },
   {
     role: 'instructor',
@@ -86,9 +90,7 @@ function MetadataCell({
         <span className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
           {label}
         </span>
-        <span className="font-mono text-xs font-semibold uppercase tracking-wider">
-          {value}
-        </span>
+        <span className="font-mono text-xs font-semibold uppercase tracking-wider">{value}</span>
       </div>
     </div>
   );
@@ -117,9 +119,7 @@ function LyricLineItem({
       {/* Translation annotation */}
       {line.translation && (
         <div className="border-l-2 border-destructive pl-2.5">
-          <span className="font-mono text-xs italic text-foreground/60">
-            {line.translation}
-          </span>
+          <span className="font-mono text-xs italic text-foreground/60">{line.translation}</span>
         </div>
       )}
 
@@ -129,7 +129,7 @@ function LyricLineItem({
           <span className="inline-block rounded-sm bg-destructive/20 px-1 font-display text-lg font-medium shadow-[0_0_0_1px_rgba(242,59,13,0.2)]">
             {line.text}
           </span>
-          <ArrowLeft className="size-3.5 text-destructive" weight="bold" />
+          <ArrowLeftIcon className="size-3.5 text-destructive" weight="bold" />
         </div>
       ) : (
         <span className="font-display text-lg font-medium">{line.text}</span>
@@ -183,15 +183,17 @@ function InstructorMessage({ message }: { message: ChatMessage }) {
               <TooltipProvider>
                 {message.actions.map((action) => (
                   <Tooltip key={action.label}>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="xs"
-                        className="font-mono text-[10px] uppercase"
-                      >
-                        {action.label}
-                      </Button>
-                    </TooltipTrigger>
+                    <TooltipTrigger
+                      render={
+                        <Button
+                          variant="outline"
+                          size="xs"
+                          className="font-mono text-[10px] uppercase"
+                        >
+                          {action.label}
+                        </Button>
+                      }
+                    />
                     <TooltipContent>
                       <p>Click to explore</p>
                     </TooltipContent>
@@ -222,9 +224,7 @@ function LearnerMessage({ message }: { message: ChatMessage }) {
 
       {/* Message content */}
       <div className="ml-16 border-l-2 border-border py-6 pl-6 pr-6">
-        <p className="font-display text-base leading-relaxed">
-          {message.content}
-        </p>
+        <p className="font-display text-base leading-relaxed">{message.content}</p>
       </div>
     </div>
   );
@@ -234,7 +234,7 @@ function SystemEvent({ text }: { text: string }) {
   return (
     <div className="flex justify-center py-2">
       <div className="flex items-center gap-1.5 rounded-full border border-destructive/20 bg-destructive/10 px-3 py-1">
-        <Lightning className="size-3 text-destructive" weight="fill" />
+        <LightningIcon className="size-3 text-destructive" weight="fill" />
         <span className="font-mono text-[10px] uppercase tracking-wider text-destructive">
           {text}
         </span>
@@ -254,7 +254,7 @@ export default function ChatPage() {
       <header className="flex shrink-0 items-center justify-between border-b border-border bg-paper px-6 py-3">
         <div className="flex items-center gap-4">
           <div className="flex size-6 items-center justify-center rounded-sm bg-foreground">
-            <ArrowLeft className="size-3 text-background" weight="bold" />
+            <ArrowLeftIcon className="size-3 text-background" weight="bold" />
           </div>
           <h2 className="font-display text-lg font-bold uppercase tracking-tight">
             THE_ARCHIVE [v.1.0]
@@ -356,7 +356,7 @@ export default function ChatPage() {
                 size="icon-lg"
                 className="absolute right-2 rounded-sm bg-foreground text-background hover:bg-foreground/80"
               >
-                <ArrowRight className="size-4" weight="bold" />
+                <ArrowRightIcon className="size-4" weight="bold" />
               </Button>
             </div>
 
@@ -364,9 +364,7 @@ export default function ChatPage() {
               <span className="text-[10px] uppercase text-foreground/40">
                 Shift + Enter for new line
               </span>
-              <span className="text-[10px] uppercase text-foreground/40">
-                Status: Connected
-              </span>
+              <span className="text-[10px] uppercase text-foreground/40">Status: Connected</span>
             </div>
           </div>
         </div>
