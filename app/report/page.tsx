@@ -80,7 +80,7 @@ export default function ReportPage() {
 
   return (
     <main className="grow flex flex-col w-full max-w-[1400px] mx-auto p-0 md:p-8 lg:p-12">
-      <div className="flex flex-col border border-ink bg-paper shadow-panel print:shadow-none print:border-2">
+      <div className="flex flex-col border border-ink bg-background shadow-panel print:shadow-none print:border-2">
         {/* ── Header ── */}
         <div className="border-b border-ink p-8 md:p-12 relative overflow-hidden">
           <div className="absolute top-0 right-0 p-4 opacity-10 pointer-events-none">
