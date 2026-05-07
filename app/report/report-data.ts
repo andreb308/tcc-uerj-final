@@ -1,51 +1,18 @@
 // -- Report data type and versioned datasets --
+// Types now imported from the shared Zod schema (single source of truth).
 
-export interface DialectMapEntry {
-  label: string;
-  value: number; // 0–100
-}
+import type { ReportData, DialectMapEntry, Idiom } from '@/lib/schemas/report';
 
-export interface Idiom {
-  term: string;
-  definition: string;
-}
+// Re-export the AI-generated types for convenience
+export type { ReportData, DialectMapEntry, Idiom };
 
-export interface ReportData {
-  // Header
+// The versioned demo datasets include envelope fields (reportId, trackTitle,
+// artist, footer) that are NOT part of the AI output schema — they come from
+// form input and server-side record creation.
+export interface VersionedReportData extends ReportData {
   reportId: string;
   trackTitle: string;
   artist: string;
-
-  // Metadata
-  metadata: {
-    album: string;
-    year: number;
-    genre: string;
-    bpm: number;
-    musicalKey: string;
-  };
-
-  // Section 01 — Thesis
-  thesis: {
-    summary: string;
-    extendedAnalysis: string;
-    instructorNote: string;
-  };
-
-  // Section 02 — Data metrics
-  dataMetrics: {
-    wordCount: number;
-    uniqueStems: number;
-    complexity: number;
-    complexityLabel: string;
-    rhymeDensity: number; // 1–5
-    dialectMap: DialectMapEntry[];
-  };
-
-  // Section 03 — Idioms
-  idioms: Idiom[];
-
-  // Footer
   footer: {
     userId: string;
     sessionId: string;
@@ -56,7 +23,7 @@ export interface ReportData {
 // ---------------------------------------------------------------------------
 // Version 0 — Kendrick Lamar "u" (original hardcoded data)
 // ---------------------------------------------------------------------------
-const kendrickReport: ReportData = {
+const kendrickReport: VersionedReportData = {
   reportId: '#00992-ALPHA',
   trackTitle: 'u',
   artist: 'Kendrick Lamar',
@@ -125,7 +92,7 @@ const kendrickReport: ReportData = {
 // ---------------------------------------------------------------------------
 // Version 1 — Taylor Swift "ME!" (AI-generated analysis)
 // ---------------------------------------------------------------------------
-const taylorReport: ReportData = {
+const taylorReport: VersionedReportData = {
   reportId: '#00993-BETA',
   trackTitle: 'ME! (feat. Brendon Urie)',
   artist: 'Taylor Swift',
@@ -184,7 +151,7 @@ const taylorReport: ReportData = {
 // ---------------------------------------------------------------------------
 // Version 2 — Taylor Swift "cowboy like me" (AI-generated analysis)
 // ---------------------------------------------------------------------------
-const cowboyReport: ReportData = {
+const cowboyReport: VersionedReportData = {
   reportId: '#00994-GAMMA',
   trackTitle: 'cowboy like me',
   artist: 'Taylor Swift',
@@ -253,4 +220,4 @@ const cowboyReport: ReportData = {
 // ---------------------------------------------------------------------------
 // Versioned report registry
 // ---------------------------------------------------------------------------
-export const REPORT_VERSIONS: ReportData[] = [kendrickReport, taylorReport, cowboyReport];
+export const REPORT_VERSIONS: VersionedReportData[] = [kendrickReport, taylorReport, cowboyReport];

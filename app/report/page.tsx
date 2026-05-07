@@ -10,14 +10,14 @@ import {
 import Link from 'next/link';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
-import { REPORT_VERSIONS, type ReportData } from './report-data';
+import { REPORT_VERSIONS, type VersionedReportData } from './report-data';
 
 export default function ReportPage() {
   const { messages, sendMessage } = useChat();
 
   // -- Data versioning --
   const [versionIndex, setVersionIndex] = useState(0);
-  const report: ReportData = REPORT_VERSIONS[versionIndex];
+  const report: VersionedReportData = REPORT_VERSIONS[versionIndex];
 
   const prevVersion = () =>
     setVersionIndex((i) => (i - 1 + REPORT_VERSIONS.length) % REPORT_VERSIONS.length);
