@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const searchParams = new URLSearchParams({ q: q.trim(), per_page: '10' });
+    const searchParams = new URLSearchParams({ q: `${artist} - ${q.trim()}`, per_page: '10' });
     const res = await fetch(`${GENIUS_API_BASE}/search?${searchParams}`, {
       headers: { Authorization: `Bearer ${token}` },
     });
@@ -30,17 +30,19 @@ export async function GET(request: NextRequest) {
     const hits = data?.response?.hits ?? [];
 
     let results = hits.map(
-      (hit: { result: { id: number; title: string; full_title: string; primary_artist: { name: string } } }) => ({
+      (hit: {
+        result: { id: number; title: string; full_title: string; primary_artist: { name: string } };
+      }) => ({
         id: hit.result.id,
         title: hit.result.title,
         artist: hit.result.primary_artist?.name ?? '',
         fullTitle: hit.result.full_title,
-      }),
+      })
     );
 
     if (artist) {
       results = results.filter((song: { artist: string }) =>
-        song.artist.toLowerCase().includes(artist),
+        song.artist.toLowerCase().includes(artist)
       );
     }
 

@@ -6,14 +6,10 @@ import { toast } from 'sonner';
 
 export default function Page() {
   return (
-    <TerminalCard title="/// INTAKE_PROTOCOL_INIT ///">
-      <button
-        type="button"
-        onClick={() => toast('Teste')}
-        className="mb-4 px-4 py-2 bg-primary text-primary-foreground rounded-md"
-      >
-        Teste Toast
-      </button>
+    <TerminalCard
+      className="motion-opacity-in-0 motion-duration-500 motion-delay-500 motion-ease-spring-bouncy motion-preset-slide-up-sm"
+      title="/// INTAKE_PROTOCOL_INIT ///"
+    >
       <IntakeForm />
     </TerminalCard>
   );

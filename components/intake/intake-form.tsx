@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 
 import { useRouter } from 'next/navigation';
 import { ArrowRightIcon } from '@phosphor-icons/react';
@@ -17,7 +20,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { LyricsModal, type LyricLine } from './lyrics-modal';
+import dynamic from 'next/dynamic';
+import type { LyricLine } from './lyrics-modal';
+
+// Lazily load the LyricsModal component to reduce the initial JavaScript bundle size.
+const LyricsModal = dynamic(() => import('./lyrics-modal').then((mod) => mod.LyricsModal));
+
+// --- Form validation schema ---
+const intakeFormSchema = z.object({
+  artist: z.string().min(1, 'Artist name is required'),
+  trackTitle: z.string().min(1, 'Track title is required'),
+  targetLanguage: z.string().min(1, 'Target language is required'),
+  artifactData: z.string().min(1, 'Lyrics data is required — select a song and extract lyrics'),
+});
+
+type IntakeFormData = z.infer<typeof intakeFormSchema>;
 
 interface FormFieldRowProps {
   label: string;
@@ -55,12 +72,23 @@ interface GeniusSong {
 
 export function IntakeForm() {
   const router = useRouter();
-  const [artistInput, setArtistInput] = useState('');
   const [debouncedArtist, setDebouncedArtist] = useState('');
-  const [songInput, setSongInput] = useState('');
   const [debouncedSong, setDebouncedSong] = useState('');
   const [selectedSong, setSelectedSong] = useState<GeniusSong | null>(null);
-  const [artifactData, setArtifactData] = useState('');
+
+  const { register, handleSubmit, control, watch, setValue, getValues } = useForm<IntakeFormData>({
+    resolver: zodResolver(intakeFormSchema),
+    defaultValues: {
+      artist: '',
+      trackTitle: '',
+      targetLanguage: 'simple-english',
+      artifactData: '',
+    },
+  });
+
+  const artistInput = watch('artist');
+  const songInput = watch('trackTitle');
+  const artifactData = watch('artifactData');
 
   // Update debounced values after 1 second of no typing
   useEffect(() => {
@@ -147,26 +175,36 @@ export function IntakeForm() {
       })
       .join('\n\n');
 
-    setArtifactData((prev) => (prev ? `${prev}\n\n${formattedText}` : formattedText));
+    const current = getValues('artifactData');
+    setValue('artifactData', current ? `${current}\n\n${formattedText}` : formattedText);
+  };
+
+  const onValid = (data: IntakeFormData) => {
+    // `data` contains the validated formData object ready to be sent to the backend
+    console.log('Form data:', data);
+    toast.success('Protocol executed successfully!');
+    router.push('/report');
+  };
+
+  const onInvalid = (errors: Record<string, { message?: string }>) => {
+    const messages = Object.values(errors)
+      .map((err) => err.message)
+      .filter(Boolean);
+
+    if (messages.length > 0) {
+      toast.error(messages.map((msg, i) => <p key={i}>{msg}</p>));
+    }
   };
 
   return (
-    <form
-      onSubmit={(e) => {
-        e.preventDefault();
-        toast.success('Protocol executed successfully!');
-        router.push('/report');
-      }}
-      className="flex min-h-0 flex-1 flex-col"
-    >
+    <form onSubmit={handleSubmit(onValid, onInvalid)} className="flex min-h-0 flex-1 flex-col">
       {/* Artist ID */}
       <FormFieldRow label="Artist_ID" htmlFor="artist-id">
         <Input
           id="artist-id"
           list="artist-suggestions"
           placeholder="ENTER_NAME..."
-          value={artistInput}
-          onChange={(e) => setArtistInput(e.target.value)}
+          {...register('artist')}
           onKeyDown={(e) => {
             if (e.key === 'Enter') e.preventDefault();
           }}
@@ -184,22 +222,23 @@ export function IntakeForm() {
         <Input
           id="track-title"
           list="song-suggestions"
+          autoComplete="off"
           placeholder="ENTER_TITLE..."
-          value={songInput}
-          onChange={(e) => {
-            const value = e.target.value;
-            setSongInput(value);
-            
-            // Check if user selected something from datalist
-            const song = songResults.find((s: GeniusSong) => s.title === value);
-            if (song) {
-              setSelectedSong(song);
-              setArtifactData('');
-            } else if (selectedSong && value !== selectedSong.title) {
-              setSelectedSong(null);
-              setArtifactData('');
-            }
-          }}
+          {...register('trackTitle', {
+            onChange: (e) => {
+              const value = e.target.value;
+
+              // Check if user selected something from datalist
+              const song = songResults.find((s: GeniusSong) => s.title === value);
+              if (song) {
+                setSelectedSong(song);
+                setValue('artifactData', '');
+              } else if (selectedSong && value !== selectedSong.title) {
+                setSelectedSong(null);
+                setValue('artifactData', '');
+              }
+            },
+          })}
           onKeyDown={(e) => {
             if (e.key === 'Enter') e.preventDefault();
           }}
@@ -214,21 +253,27 @@ export function IntakeForm() {
         </datalist>
       </FormFieldRow>
 
-      {/* Target Language */}
+      {/* Target Language — controlled via Controller since base-ui Select doesn't expose a native ref */}
       <FormFieldRow label="Target_Lang" htmlFor="target-lang">
-        <Select defaultValue="simple-english">
-          <SelectTrigger className="h-full w-full border-0 bg-transparent text-sm focus-visible:ring-0">
-            <SelectValue placeholder="Select language..." />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="simple-english">Simple English</SelectItem>
-            <SelectItem value="portuguese">Portuguese</SelectItem>
-            <SelectItem value="spanish">Spanish</SelectItem>
-            <SelectItem value="french">French</SelectItem>
-            <SelectItem value="german">German</SelectItem>
-            <SelectItem value="japanese">Japanese</SelectItem>
-          </SelectContent>
-        </Select>
+        <Controller
+          control={control}
+          name="targetLanguage"
+          render={({ field }) => (
+            <Select value={field.value} onValueChange={field.onChange}>
+              <SelectTrigger className="h-full w-full border-0 bg-transparent text-sm focus-visible:ring-0">
+                <SelectValue placeholder="Select language..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="simple-english">Simple English</SelectItem>
+                <SelectItem value="portuguese">Portuguese</SelectItem>
+                <SelectItem value="spanish">Spanish</SelectItem>
+                <SelectItem value="french">French</SelectItem>
+                <SelectItem value="german">German</SelectItem>
+                <SelectItem value="japanese">Japanese</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        />
       </FormFieldRow>
 
       {/* Artifact Data (Lyrics) */}
@@ -266,7 +311,7 @@ export function IntakeForm() {
                     Protocol ready for extraction
                   </span>
                 </div>
-                
+
                 <LyricsModal
                   songId={selectedSong.id}
                   songTitle={selectedSong.title}

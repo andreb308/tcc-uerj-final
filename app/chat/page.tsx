@@ -314,8 +314,8 @@ export default function ChatPage() {
         {/* Right Pane — The Interrogation */}
         <div className="relative flex w-[60%] flex-col bg-paper">
           {/* Chat stream */}
-          <ScrollArea className="min-h-0 flex-1 overflow-hidden">
-            <div className="flex flex-col gap-12 px-8 pb-40 pt-8">
+          <ScrollArea className="flex-1 h-5/6">
+            <div className="flex flex-col gap-12 p-8">
               {/* Session log start */}
               <div className="border-b border-foreground/20 pb-4">
                 <p className="text-center font-mono text-xs uppercase tracking-widest text-foreground/40">
@@ -340,7 +340,7 @@ export default function ChatPage() {
           </ScrollArea>
 
           {/* Input area — pinned to bottom */}
-          <div className="absolute inset-x-0 bottom-0 border-t border-border bg-paper px-6 pb-6 pt-6">
+          <div className="h-1/6 border-t border-border bg-paper px-6 pb-6 pt-6">
             <div className="relative flex items-center">
               {/* Prompt chevron */}
               <span className="absolute left-4 z-10 font-mono text-xl font-semibold text-destructive">

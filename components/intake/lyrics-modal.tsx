@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/animated-modal';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { CircleNotch } from '@phosphor-icons/react';
+import { CircleNotchIcon } from '@phosphor-icons/react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 
@@ -88,7 +88,10 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center p-12">
             <div className="flex flex-col items-center gap-4">
-              <CircleNotch className="h-8 w-8 animate-spin text-muted-foreground" weight="bold" />
+              <CircleNotchIcon
+                className="h-8 w-8 animate-spin text-muted-foreground"
+                weight="bold"
+              />
               <p className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
                 Extracting Protocol Data...
               </p>
@@ -101,70 +104,68 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
             </p>
           </div>
         ) : (
-          <ScrollArea className="h-full w-full relative">
-            <div className="flex flex-col gap-1 p-6 pb-24">
-              {lyricsData.lyrics.map((line, index) => {
-                const isSelected = selectedLines.has(index);
+          <ScrollArea className="h-[720px] [&>div]:h-3/4 w-full relative flex flex-col gap-1 p-0">
+            {lyricsData.lyrics.map((line, index) => {
+              const isSelected = selectedLines.has(index);
 
-                if (line.annotation && !line.text) {
-                  return (
-                    <div key={`ann-${index}`} className="mt-6 mb-2 first:mt-0 px-2">
-                      <span className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                        {line.annotation}
-                      </span>
-                    </div>
-                  );
-                }
-
+              if (line.annotation && !line.text) {
                 return (
-                  <button
-                    type="button"
-                    key={`${line.number}-${index}`}
-                    onClick={() => toggleLine(index)}
-                    className={cn(
-                      'group relative flex w-full items-start gap-3 rounded-sm p-3 text-left transition-colors border border-transparent',
-                      isSelected
-                        ? 'bg-destructive/10 border-destructive/20 shadow-[0_0_0_1px_rgba(242,59,13,0.1)]'
-                        : 'hover:bg-muted/50 hover:border-border'
-                    )}
-                  >
-                    <div className="flex h-6 items-center shrink-0">
-                      <Checkbox
-                        checked={isSelected}
-                        onCheckedChange={() => toggleLine(index)}
-                        className={cn(
-                          'data-[state=checked]:bg-destructive data-[state=checked]:border-destructive',
-                          !isSelected && 'opacity-0 group-hover:opacity-100 transition-opacity'
-                        )}
-                        aria-label={`Select line ${line.number}`}
-                      />
-                    </div>
-                    
-                    <span className="flex h-6 items-center shrink-0 font-mono text-[10px] text-foreground/40 w-6">
-                      {line.number}
+                  <div key={`ann-${index}`} className="mt-6 mb-2 first:mt-0 px-2">
+                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                      {line.annotation}
                     </span>
-
-                    <div className="flex flex-col gap-1 min-w-0 flex-1">
-                      {line.annotation && (
-                        <div className="border-l-2 border-destructive pl-2.5">
-                          <span className="font-mono text-xs italic text-foreground/60 block truncate">
-                            {line.annotation}
-                          </span>
-                        </div>
-                      )}
-                      <span
-                        className={cn(
-                          'font-display text-lg font-medium transition-colors',
-                          isSelected ? 'text-destructive' : 'text-foreground'
-                        )}
-                      >
-                        {line.text}
-                      </span>
-                    </div>
-                  </button>
+                  </div>
                 );
-              })}
-            </div>
+              }
+
+              return (
+                <button
+                  type="button"
+                  key={`${line.number}-${index}`}
+                  onClick={() => toggleLine(index)}
+                  className={cn(
+                    'group relative flex w-full items-start gap-3 rounded-sm p-3 text-left transition-colors border border-transparent',
+                    isSelected
+                      ? 'bg-destructive/10 border-destructive/20 shadow-[0_0_0_1px_rgba(242,59,13,0.1)]'
+                      : 'hover:bg-muted/50 hover:border-border'
+                  )}
+                >
+                  <div className="flex h-6 items-center shrink-0">
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => toggleLine(index)}
+                      className={cn(
+                        'data-[state=checked]:bg-destructive data-[state=checked]:border-destructive',
+                        !isSelected && 'opacity-0 group-hover:opacity-100 transition-opacity'
+                      )}
+                      aria-label={`Select line ${line.number}`}
+                    />
+                  </div>
+
+                  <span className="flex h-6 items-center shrink-0 font-mono text-[10px] text-foreground/40 w-6">
+                    {line.number}
+                  </span>
+
+                  <div className="flex flex-col gap-1 min-w-0 flex-1">
+                    {line.annotation && (
+                      <div className="border-l-2 border-destructive pl-2.5">
+                        <span className="font-mono text-xs italic text-foreground/60 block truncate">
+                          {line.annotation}
+                        </span>
+                      </div>
+                    )}
+                    <span
+                      className={cn(
+                        'font-display text-lg font-medium transition-colors',
+                        isSelected ? 'text-destructive' : 'text-foreground'
+                      )}
+                    >
+                      {line.text}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
           </ScrollArea>
         )}
       </ModalContent>
@@ -201,20 +202,20 @@ export function LyricsModal({ songId, songTitle, artistName, onConfirm }: Lyrics
     <Modal>
       <ModalTrigger
         className={cn(
-          "w-full sm:w-auto h-12 inline-flex items-center justify-center gap-2 rounded-none px-6",
-          "font-mono text-xs font-bold uppercase tracking-widest transition-colors",
-          "disabled:opacity-50 disabled:cursor-not-allowed",
-          "bg-muted hover:bg-muted/80 text-foreground border border-border"
+          'w-full sm:w-auto h-12 inline-flex items-center justify-center gap-2 rounded-none px-6',
+          'font-mono text-xs font-bold uppercase tracking-widest transition-colors',
+          'disabled:opacity-50 disabled:cursor-not-allowed',
+          'bg-muted hover:bg-muted/80 text-foreground border border-border'
         )}
       >
         [ FETCH_EVIDENCE ]
       </ModalTrigger>
       {/* We use an inner component so it can access useModal() and control setOpen */}
-      <LyricsSelector 
-        songId={songId} 
-        songTitle={songTitle} 
-        artistName={artistName} 
-        onConfirm={onConfirm} 
+      <LyricsSelector
+        songId={songId}
+        songTitle={songTitle}
+        artistName={artistName}
+        onConfirm={onConfirm}
       />
     </Modal>
   );
