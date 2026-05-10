@@ -179,11 +179,25 @@ export function IntakeForm() {
     setValue('artifactData', current ? `${current}\n\n${formattedText}` : formattedText);
   };
 
-  const onValid = (data: IntakeFormData) => {
-    // `data` contains the validated formData object ready to be sent to the backend
-    console.log('Form data:', data);
-    toast.success('Protocol executed successfully!');
-    router.push('/report');
+  const onValid = async (data: IntakeFormData) => {
+    try {
+      // 1. Create report record on the server
+      const res = await fetch('/api/report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        toast.error('Failed to create report');
+        return;
+      }
+      const { id } = await res.json();
+      // 2. Navigate to the report page
+      toast.success('Protocol executed successfully!');
+      router.push(`/report/${id}`);
+    } catch (err) {
+      toast.error('An error occurred during submission');
+    }
   };
 
   const onInvalid = (errors: Record<string, { message?: string }>) => {

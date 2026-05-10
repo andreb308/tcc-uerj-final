@@ -23,8 +23,8 @@ export async function POST(req: Request) {
 
     if (!parsed.success) {
       return NextResponse.json(
-        { error: 'Validation failed', details: parsed.error.flatten().fieldErrors },
-        { status: 400 },
+        { error: 'Validation failed', details: z.treeifyError(parsed.error).errors },
+        { status: 400 }
       );
     }
 

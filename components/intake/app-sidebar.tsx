@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import {
   Sidebar,
   SidebarContent,
@@ -12,6 +15,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
+import type { ReportRecord } from '@/lib/report-store';
 
 const NAV_ITEMS = [
   { label: 'INTAKE_PROTOCOL', href: '/' },
@@ -32,6 +36,17 @@ function formatUptime(start: number) {
 
 export function AppSidebar() {
   const [uptime, setUptime] = useState('142:04:11');
+  const pathname = usePathname();
+
+  const { data: reports = [] } = useQuery<ReportRecord[]>({
+    queryKey: ['reports'],
+    queryFn: async () => {
+      const res = await fetch('/api/reports');
+      if (!res.ok) throw new Error('Failed to fetch reports');
+      return res.json();
+    },
+    refetchInterval: 3000, // Poll every 3 seconds to catch newly created reports
+  });
 
   useEffect(() => {
     const start = Date.now() - (142 * 3600 + 4 * 60 + 11) * 1000;
@@ -54,16 +69,31 @@ export function AppSidebar() {
 
           <SidebarGroupContent>
             <SidebarMenu className="gap-0">
-              {NAV_ITEMS.map((item, i) => (
-                <SidebarMenuItem key={item.label}>
-                  <SidebarMenuButton
-                    isActive={i === 0}
-                    className="rounded-none border-b border-border bg-muted px-4 py-6 text-xs font-bold uppercase tracking-wider data-[active=true]:bg-foreground data-[active=true]:text-background ext-foreground hover:bg-foreground hover:text-background cursor-pointer"
-                  >
-                    [ {item.label} ]
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {/* Dynamic Reports from Store */}
+              {reports.length
+                ? reports.map((report) => (
+                    <SidebarMenuItem key={report.id}>
+                      <SidebarMenuButton
+                        render={
+                          <Link href={`/report/${report.id}`}>
+                            [ {report.artist} - {report.trackTitle} ]
+                          </Link>
+                        }
+                        isActive={pathname === `/report/${report.id}`}
+                        className="rounded-none border-b border-border bg-muted px-4 py-6 text-xs font-bold uppercase tracking-wider data-[active=true]:bg-foreground data-[active=true]:text-background ext-foreground hover:bg-foreground hover:text-background cursor-pointer"
+                      ></SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))
+                : NAV_ITEMS.map((item, i) => (
+                    <SidebarMenuItem key={item.label}>
+                      <SidebarMenuButton
+                        isActive={i === 0}
+                        className="rounded-none border-b border-border bg-muted px-4 py-6 text-xs font-bold uppercase tracking-wider data-[active=true]:bg-foreground data-[active=true]:text-background ext-foreground hover:bg-foreground hover:text-background cursor-pointer"
+                      >
+                        [ {item.label} ]
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

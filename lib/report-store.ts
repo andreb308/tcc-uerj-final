@@ -1,4 +1,6 @@
 import type { ReportData } from '@/lib/schemas/report';
+import fs from 'fs';
+import path from 'path';
 
 // ---------------------------------------------------------------------------
 // Report Record — the full envelope wrapping AI output + form input
@@ -42,14 +44,34 @@ export interface CreateReportInput {
 // stays identical so callers never need to change.
 // ---------------------------------------------------------------------------
 
-const store = new Map<string, ReportRecord>();
+let store: ReportRecord[] = [];
+
+// ---------------------------------------------------------------------------
+// Load initial data from dump if exists
+// ---------------------------------------------------------------------------
+try {
+  const dumpPath = path.join(process.cwd(), 'report-dump.json');
+  if (fs.existsSync(dumpPath)) {
+    const rawData = fs.readFileSync(dumpPath, 'utf-8');
+    const parsedData = JSON.parse(rawData);
+    if (Array.isArray(parsedData)) {
+      store = parsedData.map((item) => ({
+        ...item,
+        createdAt: new Date(item.createdAt),
+      }));
+      console.log(`[Store] Loaded ${store.length} reports from report-dump.json`);
+    }
+  }
+} catch (err) {
+  console.error('[Store] Failed to load report dump:', err);
+}
 
 /**
  * Creates a new report record with status `pending`.
  * Returns the generated `{ id }`.
  */
 export function createReport(input: CreateReportInput): { id: string } {
-  const id = crypto.randomUUID();
+  const id = String(store.length + 1);
 
   const record: ReportRecord = {
     id,
@@ -62,7 +84,9 @@ export function createReport(input: CreateReportInput): { id: string } {
     createdAt: new Date(),
   };
 
-  store.set(id, record);
+  store = [...store, record];
+  console.log('Report created.\n' + JSON.stringify(store));
+
   return { id };
 }
 
@@ -70,7 +94,12 @@ export function createReport(input: CreateReportInput): { id: string } {
  * Retrieves a report record by ID, or `null` if not found.
  */
 export function getReport(id: string): ReportRecord | null {
-  return store.get(id) ?? null;
+  const searchResult = store.find((r) => {
+    console.log(`Buscand report ${id}. Comparando com ${r.id}`);
+    return r.id === id;
+  });
+  console.log('getReport -> ' + JSON.stringify(searchResult));
+  return searchResult ?? null;
 }
 
 /**
@@ -79,13 +108,15 @@ export function getReport(id: string): ReportRecord | null {
  */
 export function updateReport(
   id: string,
-  partial: Partial<Pick<ReportRecord, 'reportData' | 'artist' | 'trackTitle'>>,
+  partial: Partial<Pick<ReportRecord, 'reportData' | 'artist' | 'trackTitle'>>
 ): ReportRecord | null {
-  const record = store.get(id);
+  const record = store.find((r) => r.id === id);
   if (!record) return null;
 
   const updated: ReportRecord = { ...record, ...partial };
-  store.set(id, updated);
+  store = store.map((rep) => (rep.id === id ? updated : rep));
+  console.log('updateReport -> ' + JSON.stringify(store));
+
   return updated;
 }
 
@@ -93,10 +124,18 @@ export function updateReport(
  * Updates the status field of an existing record.
  */
 export function setReportStatus(id: string, status: ReportStatus): ReportRecord | null {
-  const record = store.get(id);
+  const record = store.find((r) => r.id === id);
   if (!record) return null;
 
   const updated: ReportRecord = { ...record, status };
-  store.set(id, updated);
+  store = store.map((rep) => (rep.id === id ? updated : rep));
+  console.log('setReportStatus -> ' + JSON.stringify(store));
   return updated;
+}
+
+/**
+ * Retrieves all report records.
+ */
+export function getAllReports() {
+  return store;
 }

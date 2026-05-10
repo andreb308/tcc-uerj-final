@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "postinstall": "patch-package",
+    "export-reports": "curl -s http://localhost:3000/api/reports > report-dump.json"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.65",
@@ -39,6 +41,8 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
+    "patch-package": "^8.0.1",
+    "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.8.1",
     "tailwindcss": "^4",
     "tailwindcss-motion": "^1.1.1",

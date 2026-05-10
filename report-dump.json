@@ -1,0 +1,266 @@
+[
+  {
+    "id": "1",
+    "status": "complete",
+    "artist": "Taylor Swift",
+    "trackTitle": "Need",
+    "targetLanguage": "simple-english",
+    "artifactData": "Desire is the sound of the whiskey telling me you miss me, can you come around?",
+    "reportData": {
+      "id": "TS-NEED-ANA-001",
+      "metadata": {
+        "album": "Lover (Outtake/Vault)",
+        "year": 2019,
+        "genre": "Synth-Pop",
+        "bpm": 105,
+        "musicalKey": "D Minor"
+      },
+      "thesis": {
+        "summary": "O trecho explora a **personificação do desejo** através de imagens sensoriais e etílicas, estabelecendo uma analogia entre o estado de embriaguez emocional e a súplica por proximidade.",
+        "extendedAnalysis": "Nesta composição, originalmente concebida para a era *Lover*, a artista utiliza o *whiskey* não apenas como um tropo alcoólico, mas como um *agente mediador* de uma consciência alterada que projeta o desejo do eu lírico no outro. A estrutura lírica de Swift, frequentemente baseada em detalhes visuais e tácteis — como a 'fumaça de cigarro na jaqueta' mencionada logo antes do trecho — aqui evolui para uma dimensão auditiva, onde o som da bebida é a voz que comunica a ausência e o anseio.\n\nO uso da pergunta retórica 'can you come around?' ao final do trecho subverte a introspecção inicial, transicionando de uma análise poética do desejo para um apelo direto. A escolha lexical destaca a vulnerabilidade e a dependência emocional, características centrais da narrativa desta faixa, que frequentemente oscila entre o controle performativo da artista e a entrega total ao objeto do afeto.",
+        "instructorNote": "Note a técnica de *sinestesia* empregada aqui: o desejo não é sentido, ele é 'ouvido' através do som do whiskey. É uma manobra lírica clássica de Swift para descrever o início de uma espiral de saudade."
+      },
+      "dataMetrics": {
+        "wordCount": 16,
+        "uniqueStems": 15,
+        "complexity": 0.65,
+        "complexityLabel": "MODERATE",
+        "rhymeDensity": 2,
+        "dialectMap": [
+          { "label": "POETIC", "value": 85 },
+          { "label": "MELANCHOLIC", "value": 70 },
+          { "label": "INTIMATE", "value": 90 }
+        ]
+      },
+      "idioms": [
+        {
+          "term": "whiskey telling me you miss me",
+          "definition": "Metáfora para o estado em que o consumo de álcool intensifica a saudade, fazendo com que o indivíduo interprete sinais subjetivos como provas de um desejo recíproco."
+        },
+        {
+          "term": "come around",
+          "definition": "Expressão coloquial para pedir que alguém visite ou retorne à presença do falante, carregando um tom de urgência ou desespero emocional neste contexto."
+        }
+      ]
+    },
+    "createdAt": "2026-05-10T11:40:37.730Z"
+  },
+  {
+    "id": "2",
+    "status": "complete",
+    "artist": "Stray Kids",
+    "trackTitle": "CASE 143",
+    "targetLanguage": "simple-english",
+    "artifactData": "[13] Rolling in the deep inside my head\n\n[14] You got me bad\n\n[15] 무장해제\n\n[16] 신속하게 네게로 moving, on my way (Oh)\n\n[17] Why do I keep getting attracted?\n\n[18] 자석 같이 끌려가 (Oh)\n\n[19] I cannot explain this reaction\n\n[20] 이것밖에 one-four-three",
+    "reportData": {
+      "id": "SKZ-CASE143-001",
+      "metadata": {
+        "album": "MAXIDENT",
+        "year": 2022,
+        "genre": "Electropop / K-Pop",
+        "bpm": 100,
+        "musicalKey": "Gb Minor"
+      },
+      "thesis": {
+        "summary": "O trecho encapsula a *perda de controle cognitivo* e a desorientação emocional causadas pela paixão súbita, estruturando o amor como um **caso clínico** a ser investigado.",
+        "extendedAnalysis": "Neste segmento, o eu-lírico vivencia uma *dissonância cognitiva* aguda. A metáfora de 'rolling in the deep' e a 'reação inexplicável' sugerem um estado de desamparo emocional, onde a racionalidade cede lugar ao impulso afetivo. O uso do termo coreano *mujang-haeje* (무장해제 - desarmamento) enfatiza a vulnerabilidade total, indicando que as defesas psicológicas do artista foram neutralizadas pela atração fatal.\n\nA transição entre a confusão interna e a conclusão numérica '143' (código universal para 'I Love You') demonstra a tentativa frustrada de codificar sentimentos complexos em lógica simples. A repetição do padrão léxico reforça a ideia de um ciclo vicioso, onde o artista, ao tentar analisar o 'problema' do amor, apenas se aprofunda mais na atração, culminando na rendição total ao sentimento, que é a assinatura temática de *MAXIDENT*.",
+        "instructorNote": "Note o uso da técnica de 'reificação' das emoções: o amor não é sentido, ele é processado como uma falha no sistema operacional da mente, exigindo uma solução técnica (o código 143)."
+      },
+      "dataMetrics": {
+        "wordCount": 38,
+        "uniqueStems": 32,
+        "complexity": 0.45,
+        "complexityLabel": "MODERATE",
+        "rhymeDensity": 3,
+        "dialectMap": [
+          { "label": "K-POP HYBRID", "value": 90 },
+          { "label": "DIGITAL-ERA SLANG", "value": 75 },
+          { "label": "POETIC", "value": 40 }
+        ]
+      },
+      "idioms": [
+        {
+          "term": "Rolling in the deep",
+          "definition": "Metáfora para estar imerso ou dominado por emoções profundas e avassaladoras."
+        },
+        {
+          "term": "143",
+          "definition": "Código numérico (baseado no número de letras) para 'I Love You', originário da era dos pagers."
+        },
+        {
+          "term": "무장해제 (Mujang-haeje)",
+          "definition": "Desarmamento; no contexto, refere-se a baixar as defesas emocionais diante de alguém."
+        },
+        {
+          "term": "You got me bad",
+          "definition": "Expressão coloquial indicando estar profundamente apaixonado ou sob controle de algo/alguém."
+        }
+      ]
+    },
+    "createdAt": "2026-05-10T11:58:29.666Z"
+  },
+  {
+    "id": "3",
+    "status": "complete",
+    "artist": "Marina Sena",
+    "trackTitle": "Lua Cheia",
+    "targetLanguage": "portuguese",
+    "artifactData": "[33] Juro que eu tentei não deixar rolar\n\n[34] Mas seu beijo é bom, dá pra viciar\n\n[35] Não dá pra dormir sem te ligar\n\n[36] Acabei de me apaixonar\n\n[37] O santo bateu, vou deixar rolar\n\n[38] Nada pra perder, tudo pra ganhar\n\n[39] Fica mais aqui, eu vou te buscar (buscar, buscar, buscar, buscar)",
+    "reportData": {
+      "id": "MS-LC-2025-ANL",
+      "metadata": {
+        "album": "Coisas Naturais",
+        "year": 2025,
+        "genre": "Pop / MPB / Experimental",
+        "bpm": 132,
+        "musicalKey": "Ab Major"
+      },
+      "thesis": {
+        "summary": "O trecho encapsula a **rendição incondicional ao impulso amoroso**, utilizando a metáfora do *santo que bateu* para descrever uma conexão imediata e incontrolável entre dois sujeitos.",
+        "extendedAnalysis": "A letra articula a tensão dialética entre a resistência racional (*Juro que eu tentei não deixar rolar*) e a entrega sensorial (*seu beijo é bom, dá pra viciar*). Marina Sena utiliza uma linguagem coloquial que desmantela defesas psíquicas, transformando o ato de 'se apaixonar' em um evento inevitável e quase ritualístico, intrínseco à atmosfera de *Coisas Naturais*.\n\nMais do que uma ode ao romance, o trecho opera sob a premissa de um *fatalismo positivo*. Ao afirmar que não há nada a perder, a artista legitima a vulnerabilidade como uma forma de potência. A repetição final de 'buscar' atua como uma âncora rítmica que enfatiza o desespero crescente e o desejo de posse, elevando a composição de um relato de flerte para uma declaração de urgência existencial e emocional.",
+        "instructorNote": "Note o uso da repetição lexical no verso final: a reiteração obsessiva de 'buscar' não é apenas uma muleta rítmica, mas um efeito de produção para simular o *loopy* efeito de uma mente tomada pelo desejo."
+      },
+      "dataMetrics": {
+        "wordCount": 61,
+        "uniqueStems": 35,
+        "complexity": 0.38,
+        "complexityLabel": "LOW",
+        "rhymeDensity": 4,
+        "dialectMap": [
+          { "label": "POETIC", "value": 45 },
+          { "label": "SLANG", "value": 70 },
+          { "label": "COLLOQUIAL", "value": 85 },
+          { "label": "MELANCHOLIC", "value": 20 }
+        ]
+      },
+      "idioms": [
+        {
+          "term": "Deixar rolar",
+          "definition": "Permitir que uma situação aconteça naturalmente, sem interferência ou controle racional."
+        },
+        {
+          "term": "O santo bateu",
+          "definition": "Expressão brasileira que indica afinidade imediata, conexão espiritual ou química instantânea entre pessoas."
+        },
+        {
+          "term": "Dá pra viciar",
+          "definition": "Metáfora para uma experiência física ou emocional tão prazerosa que se torna compulsiva."
+        },
+        {
+          "term": "Nada pra perder, tudo pra ganhar",
+          "definition": "Locução que justifica a tomada de risco como uma decisão lógica onde o benefício supera a ausência de prejuízo."
+        }
+      ]
+    },
+    "createdAt": "2026-05-10T12:09:36.466Z"
+  },
+  {
+    "id": "4",
+    "status": "complete",
+    "artist": "Marina Sena",
+    "trackTitle": "Numa Ilha",
+    "targetLanguage": "simple-english",
+    "artifactData": "[01] Descalça numa ilha, é tão mágico\n\n[02] Você dizendo que me ama\n\n[03] A Lua refletindo o mar, o seu cheiro\n\n[04] A gente junto na minha canga\n\n[05] Beijando o corpo inteiro, o vento no cabelo\n\n[06] Me levando pra entrar no mar na noite adentro\n\n[07] Se essa Lua fosse minha, eu te levava, amor\n\n[08] Pra orbitar a Terra enquanto me ama",
+    "reportData": {
+      "id": "MS-NI-2024-001",
+      "metadata": {
+        "album": "Coisas Naturais",
+        "year": 2024,
+        "genre": "Latin Pop / Bachata Fusion",
+        "bpm": 130,
+        "musicalKey": "Em"
+      },
+      "thesis": {
+        "summary": "O trecho evoca uma **paisagem sensorial de idílio romântico**, onde a fusão entre a natureza e a intimidade do casal é celebrada através de uma atmosfera mágica e onírica.",
+        "extendedAnalysis": "A letra de *Numa Ilha* funciona como uma crônica da *intimidade transcendental*, utilizando elementos da geografia litorânea — a areia, o mar, a canga e o luar — para ancorar a experiência emocional da narradora. A referência ao 'orbitar a Terra' eleva a experiência amorosa da esfera física para uma dimensão **cosmológica**, sugerindo que o afeto tem a capacidade de suspender a realidade tangível.\n\nEste trabalho de Marina Sena explora profundamente o conceito de 'América Latina pulsante', integrando elementos rítmicos da **bachata dominicana** que conversam com a lírica litorânea brasileira. A escolha lexical reflete um estado de espírito de entrega total, onde o corpo e a natureza se tornam um só, consolidando a identidade da artista como uma figura que busca a conexão entre o *interior* brasileiro e a vastidão da experiência latina global.",
+        "instructorNote": "A estrutura rítmica aqui é notável: o uso do estaccato instrumental contrastado com a fluidez das vogais cria uma síncope que simula o balanço das ondas, técnica que é o pilar da identidade estética desta nova fase da artista."
+      },
+      "dataMetrics": {
+        "wordCount": 68,
+        "uniqueStems": 52,
+        "complexity": 0.42,
+        "complexityLabel": "MODERATE",
+        "rhymeDensity": 3,
+        "dialectMap": [
+          { "label": "POETIC", "value": 85 },
+          { "label": "ROMANTIC", "value": 90 },
+          { "label": "LATIN-FUSION", "value": 75 },
+          { "label": "COLLOQUIAL", "value": 60 }
+        ]
+      },
+      "idioms": [
+        {
+          "term": "Canga",
+          "definition": "Tecido leve utilizado na praia como toalha ou vestimenta; no contexto, simboliza o território privado e o conforto do casal."
+        },
+        {
+          "term": "Orbitar a Terra",
+          "definition": "Metáfora para a sensação de distanciamento do mundo real e a criação de um universo isolado, girando apenas em torno do amor mútuo."
+        },
+        {
+          "term": "Noite adentro",
+          "definition": "Expressão que denota uma ação que se prolonga pela madrugada, reforçando a imersão na experiência e o desejo de continuidade do tempo presente."
+        }
+      ]
+    },
+    "createdAt": "2026-05-10T12:14:13.305Z"
+  },
+  {
+    "id": "5",
+    "status": "complete",
+    "artist": "Ariana Grande",
+    "trackTitle": "NASA",
+    "targetLanguage": "simple-english",
+    "artifactData": "[26] Bottom line\n\n[27] Usually, I would love it if you stayed the night\n\n[28] I just think I'm on another page tonight\n\n[29] It ain't nothing wrong with saying I need me time\n\n[30] Usually, I would orbit around you, but gravity\n\n[31] Seems to be the only thing that's pulling me\n\n[32] You'll be my rise and shine\n\n[33] Soon as them stars align",
+    "reportData": {
+      "id": "NASA-AG-2019-ANL",
+      "metadata": {
+        "album": "thank u, next",
+        "year": 2019,
+        "genre": "Contemporary R&B / Pop",
+        "bpm": 75,
+        "musicalKey": "F# Major"
+      },
+      "thesis": {
+        "summary": "O trecho encapsula a *dialética da independência* dentro de um relacionamento romântico, onde o distanciamento físico é apresentado como uma ferramenta necessária para a preservação do eu e do desejo.",
+        "extendedAnalysis": "Nesta passagem de *NASA*, Ariana Grande subverte a expectativa romântica tradicional ao priorizar o 'me time' (tempo para si) como uma condição indispensável para a manutenção do afeto. A metáfora central do *orbitar* ilustra o dilema da codependência: estar próximo demais do parceiro resulta em uma força gravitacional que 'puxa' o indivíduo para baixo, comprometendo sua identidade singular.\n\nHistoricamente, o álbum *thank u, next* marca um período de introspecção na carreira da artista, refletindo sobre a necessidade de curar-se e encontrar autonomia após sucessivas turbulências emocionais. Ao utilizar a terminologia astronáutica como metáfora espacial, Grande eleva a discussão sobre limites pessoais a um plano quase cósmico, onde a ausência não é sinônimo de término, mas de um reajuste de frequência para permitir que os 'astros' (os indivíduos) se alinhem de forma saudável.",
+        "instructorNote": "Note o uso técnico da gravidade como metáfora para o sufoque emocional; a transição de um estado de passividade (orbitar) para um de autonomia (precisar de espaço) é o pivô semântico que sustenta a tese da canção."
+      },
+      "dataMetrics": {
+        "wordCount": 63,
+        "uniqueStems": 45,
+        "complexity": 0.45,
+        "complexityLabel": "MODERATE",
+        "rhymeDensity": 3,
+        "dialectMap": [
+          { "label": "POETIC", "value": 85 },
+          { "label": "SLANG", "value": 40 },
+          { "label": "CONTEMPORARY", "value": 70 }
+        ]
+      },
+      "idioms": [
+        {
+          "term": "On another page",
+          "definition": "Estar em um estado mental, foco ou prioridade diferente do parceiro no momento."
+        },
+        {
+          "term": "Me time",
+          "definition": "Expressão coloquial que designa tempo reservado exclusivamente para o cuidado pessoal e solidão."
+        },
+        {
+          "term": "Orbit around you",
+          "definition": "Metáfora para girar a vida e as ações em torno de outra pessoa, perdendo o centro próprio."
+        },
+        {
+          "term": "Rise and shine",
+          "definition": "Referência a despertar, mas aqui recontextualizada como a fonte de energia e positividade da artista."
+        },
+        {
+          "term": "Stars align",
+          "definition": "Expressão idiomática que significa quando as condições ideais ou o momento perfeito para algo finalmente acontecem."
+        }
+      ]
+    },
+    "createdAt": "2026-05-10T12:19:31.339Z"
+  }
+]

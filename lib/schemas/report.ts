@@ -23,6 +23,7 @@ export const idiomSchema = z.object({
 // ---------------------------------------------------------------------------
 
 export const reportDataSchema = z.object({
+  id: z.string(),
   metadata: z.object({
     album: z.string(),
     year: z.number(),
