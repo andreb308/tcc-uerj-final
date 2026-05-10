@@ -1,9 +1,14 @@
 import { NextResponse } from 'next/server';
-import { getReport, updateReport, setReportStatus } from '@/lib/report-store';
+import { getReportAction, updateReportAction, setReportStatusAction } from '@/app/actions/report';
 import { generateText, Output } from 'ai';
-import { google } from '@ai-sdk/google';
+import {
+  google,
+  GoogleGenerativeAIProviderMetadata,
+  GoogleLanguageModelOptions,
+} from '@ai-sdk/google';
 import { REPORT_SYSTEM_PROMPT } from '@/lib/prompts';
 import { reportDataSchema } from '@/lib/schemas/report';
+import { ReportStatus } from '@/generated/prisma/enums';
 
 export const maxDuration = 300; // Set to 300 seconds
 // ---------------------------------------------------------------------------
@@ -21,15 +26,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Missing report ID' }, { status: 400 });
     }
 
-    const report = getReport(id);
+    const report = await getReportAction(id);
 
     if (!report) {
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
     }
 
     if (!report?.reportData) {
-      setReportStatus(id, 'generating');
-      const { output } = await generateText({
+      await setReportStatusAction(id, 'generating');
+      const { text, output, sources, providerMetadata } = await generateText({
         model: google('gemini-3.1-flash-lite'),
         prompt: `
         artist: '${report.artist}',
@@ -41,14 +46,30 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         },
         system: REPORT_SYSTEM_PROMPT,
         output: Output.object({ schema: reportDataSchema }),
+        providerOptions: {
+          google: {
+            thinkingConfig: {
+              thinkingLevel: 'medium',
+              includeThoughts: true,
+            },
+          } satisfies GoogleLanguageModelOptions,
+        },
       });
 
+      // access the grounding metadata. Casting to the provider metadata type
+      // is optional but provides autocomplete and type safety.
+      const metadata = providerMetadata?.google as GoogleGenerativeAIProviderMetadata | undefined;
+      const groundingMetadata = metadata?.groundingMetadata;
+      const safetyRatings = metadata?.safetyRatings;
+
+      console.log({ text, sources, groundingMetadata, safetyRatings });
+
       // Save the generated data and update status
-      updateReport(id, { reportData: output });
-      setReportStatus(id, 'complete');
+      await updateReportAction(id, { reportData: output });
+      await setReportStatusAction(id, 'complete');
 
       // Return the updated report record
-      const updatedReport = getReport(id);
+      const updatedReport = await getReportAction(id);
       return NextResponse.json(updatedReport);
     }
 

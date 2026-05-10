@@ -9,6 +9,7 @@ import { z } from 'zod';
 import { useRouter } from 'next/navigation';
 import { ArrowRightIcon } from '@phosphor-icons/react';
 import { toast } from 'sonner';
+import { createReportAction } from '@/app/actions/report';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -181,17 +182,8 @@ export function IntakeForm() {
 
   const onValid = async (data: IntakeFormData) => {
     try {
-      // 1. Create report record on the server
-      const res = await fetch('/api/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      });
-      if (!res.ok) {
-        toast.error('Failed to create report');
-        return;
-      }
-      const { id } = await res.json();
+      // 1. Create report record on the server via Server Action
+      const { id } = await createReportAction(data);
       // 2. Navigate to the report page
       toast.success('Protocol executed successfully!');
       router.push(`/report/${id}`);

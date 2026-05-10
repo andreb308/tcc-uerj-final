@@ -57,3 +57,20 @@ export const reportDataSchema = z.object({
 export type ReportData = z.infer<typeof reportDataSchema>;
 export type DialectMapEntry = z.infer<typeof dialectMapEntrySchema>;
 export type Idiom = z.infer<typeof idiomSchema>;
+
+// ---------------------------------------------------------------------------
+// Full envelope schema
+// ---------------------------------------------------------------------------
+
+export const reportRecordSchema = z.object({
+  id: z.string(),
+  status: z.enum(['pending', 'generating', 'complete', 'error']),
+  artist: z.string(),
+  trackTitle: z.string(),
+  targetLanguage: z.string(),
+  artifactData: z.string(),
+  reportData: reportDataSchema.nullable(),
+  createdAt: z.date(),
+});
+
+export type ReportRecord = z.infer<typeof reportRecordSchema>;

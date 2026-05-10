@@ -15,7 +15,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-import type { ReportRecord } from '@/lib/report-store';
+import type { ReportRecord } from '@/lib/schemas/report';
+import { getAllReportsAction } from '@/app/actions/report';
 
 const NAV_ITEMS = [
   { label: 'INTAKE_PROTOCOL', href: '/' },
@@ -41,11 +42,8 @@ export function AppSidebar() {
   const { data: reports = [] } = useQuery<ReportRecord[]>({
     queryKey: ['reports'],
     queryFn: async () => {
-      const res = await fetch('/api/reports');
-      if (!res.ok) throw new Error('Failed to fetch reports');
-      return res.json();
+      return await getAllReportsAction();
     },
-    refetchInterval: 3000, // Poll every 3 seconds to catch newly created reports
   });
 
   useEffect(() => {

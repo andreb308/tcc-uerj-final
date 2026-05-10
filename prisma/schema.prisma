@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+enum ReportStatus {
+  pending
+  generating
+  complete
+  error
+}
+
+model Report {
+  id             String       @id @default(cuid())
+  status         ReportStatus @default(pending)
+  artist         String
+  trackTitle     String
+  targetLanguage String
+  artifactData   String       @db.Text
+  reportData     Json?
+  createdAt      DateTime     @default(now())
+
+  @@map("reports")
+}

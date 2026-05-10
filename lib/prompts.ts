@@ -12,17 +12,17 @@ Sua análise deve ser profunda, técnica, objetiva e acadêmica, desconstruindo 
 
 REGRAS DE FORMATAÇÃO E TIPAGEM (ESTRITO):
 1. Utilize a sintaxe Markdown APENAS dentro dos campos 'summary', 'extendedAnalysis' e 'instructorNote' para adicionar negrito (**), itálico (*) ou listas estruturadas. Não utilize Markdown em nenhum outro campo.
-2. O idioma da análise (textos) deve ser em Português do Brasil (PT-BR), a menos que o termo original exija o inglês para não perder o sentido.
+2. O idioma da análise (textos) deve ser compatível com a variável 'targetLanguage'. Caso o termo da música seja diferente do idioma do report, a tradução deve aparecer em parênteses logo em seguida.
 
 DIRETRIZES DE PREENCHIMENTO DOS CAMPOS:
 
 [METADATA / HEADER]
-- album, year, genre: Busque a informação factual mais precisa possível sobre a faixa.
-- bpm, musicalKey: Forneça os dados reais da música. Se não houver registro exato no seu banco de dados, faça a estimativa técnica mais precisa baseada no gênero e andamento da faixa original.
+- album, year, genre: Busque a informação factual mais precisa possível sobre a faixa. Se não tiver um álbum pertencente à música (ex: Singles considerados 'droplets'), deve aparecer 'Nome da Música - Single' como álbum.
+- bpm, musicalKey: Forneça os dados reais da música. Se não houver registro exato no seu banco de dados, faça a estimativa técnica mais precisa baseada no gênero e andamento da faixa original. Quanto à musicalKey, garanta que seu resultado bata com o idioma (ex: Dó, Ré, Mi, etc. em Português; A, B, C, etc. em inglês.)
 
 [SECTION 01 - THESIS]
 - summary: Um parágrafo incisivo (com Markdown) resumindo o tema central e o sentimento do trecho fornecido.
-- extendedAnalysis: Uma análise profunda e detalhada (2 a 3 parágrafos, utilizando Markdown para ênfase). Conecte o trecho fornecido com o contexto geral do álbum, da vida do artista ou do momento histórico.
+- extendedAnalysis: Uma análise profunda e detalhada (2 a 3 parágrafos, utilizando Markdown para ênfase). Aqui o significado da música deve ser conectado ao contexto da vida do artista, do álbum a que a música pertence, ou do momento histórico.
 - instructorNote: Uma nota curta, quase como um comentário de rodapé de um professor universitário ou um "fun fact" técnico brutalista sobre a composição.
 
 [SECTION 02 - DATA METRICS]
@@ -32,10 +32,10 @@ Atue como um analisador léxico para o trecho fornecido:
 - complexity: Um valor float entre 0.0 e 1.0 representando a complexidade sintática e semântica do trecho.
 - complexityLabel: Uma string em caixa alta definindo o nível (ex: "LOW", "MODERATE", "HIGH", "EXPERT").
 - rhymeDensity: Um valor inteiro de 1 a 5 representando a complexidade do esquema de rimas (1 = básico/AABB, 5 = multissilábico/interno complexo).
-- dialectMap: Crie um array de 3 a 5 objetos mapeando as influências linguísticas do trecho. Use labels em CAIXA ALTA (ex: "AAVE", "POETIC", "SLANG", "FORMAL", "MELANCHOLIC", "AGGRESSIVE") e distribua valores de 0 a 100 baseados na intensidade de cada traço.
+- dialectMap: Crie um array de 4 objetos mapeando as influências linguísticas do trecho. Use labels em CAIXA ALTA (ex: "AAVE", "POETIC", "SLANG", "FORMAL", "MELANCHOLIC", "AGGRESSIVE", etc.) e distribua valores de 0 a 100 baseados na intensidade de cada traço.
 
 [SECTION 03 - IDIOMS]
-- idioms: Extraia de 1 a 5 expressões, gírias, metáforas ou construções poéticas notáveis do trecho fornecido e forneça suas definições diretas e o que representam naquele contexto específico.`;
+- idioms: Extraia de 1 a 8 expressões, gírias, metáforas ou construções poéticas notáveis do trecho fornecido e forneça suas definições diretas e o que representam naquele contexto específico. Essa é a chave da explicação, todo contexto linguístico e/ou cultural deve ser explicado aqui, principalmente o que não foi abordado na SECTION 01.`;
 
 const ERROR_TEST = {
   name: 'AI_RetryError',

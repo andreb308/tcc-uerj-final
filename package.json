@@ -1,15 +1,15 @@
 {
   "name": "tcc-uerj-final",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "scripts": {
+    "postinstall": "npx prisma generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier --write .",
-    "postinstall": "patch-package",
-    "export-reports": "curl -s http://localhost:3000/api/reports > report-dump.json"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.65",
@@ -17,10 +17,13 @@
     "@base-ui/react": "^1.2.0",
     "@hookform/resolvers": "^5.2.2",
     "@phosphor-icons/react": "^2.1.10",
+    "@prisma/adapter-mariadb": "^7.8.0",
+    "@prisma/client": "^7.8.0",
     "@tanstack/react-query": "^5.90.21",
     "ai": "^6.0.169",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^17.4.2",
     "genius-lyrics": "^4.4.7",
     "motion": "^12.38.0",
     "next": "16.1.6",
@@ -36,7 +39,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^25.6.2",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
@@ -44,8 +47,10 @@
     "patch-package": "^8.0.1",
     "postinstall-postinstall": "^2.1.0",
     "prettier": "^3.8.1",
+    "prisma": "^7.8.0",
     "tailwindcss": "^4",
     "tailwindcss-motion": "^1.1.1",
-    "typescript": "^5"
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.3"
   }
 }

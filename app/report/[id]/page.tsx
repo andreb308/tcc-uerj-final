@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useChat } from '@ai-sdk/react';
-import type { ReportRecord } from '@/lib/report-store';
+import type { ReportRecord } from '@/lib/schemas/report';
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-gray-400 rounded-md ${className}`} />;

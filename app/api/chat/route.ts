@@ -1,6 +1,6 @@
 import { streamText, UIMessage, convertToModelMessages } from 'ai';
 import { google } from '@ai-sdk/google';
-import { getReport } from '@/lib/report-store';
+import { getReportAction } from '@/app/actions/report';
 import { REPORT_SYSTEM_PROMPT } from '@/lib/prompts';
 
 export const maxDuration = 30;
@@ -13,16 +13,13 @@ export const maxDuration = 30;
 // ---------------------------------------------------------------------------
 
 export async function POST(req: Request) {
-  const {
-    messages,
-    reportId,
-  }: { messages: UIMessage[]; reportId?: string } = await req.json();
+  const { messages, reportId }: { messages: UIMessage[]; reportId?: string } = await req.json();
 
   // Build the system prompt — optionally enriched with report context
   let systemPrompt = REPORT_SYSTEM_PROMPT;
 
   if (reportId) {
-    const record = getReport(reportId);
+    const record = await getReportAction(reportId);
 
     if (record?.reportData) {
       systemPrompt = [
@@ -43,7 +40,7 @@ export async function POST(req: Request) {
   }
 
   const result = streamText({
-    model: google('gemma-4-31b-it'),
+    model: google('gemini-3.1-flash-lite'),
     messages: await convertToModelMessages(messages || []),
     tools: {
       google_search: google.tools.googleSearch({}),
