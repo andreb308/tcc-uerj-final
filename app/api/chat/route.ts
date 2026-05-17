@@ -13,40 +13,48 @@ export const maxDuration = 30;
 // ---------------------------------------------------------------------------
 
 export async function POST(req: Request) {
-  const { messages, reportId }: { messages: UIMessage[]; reportId?: string } = await req.json();
+  try {
+    const { messages, reportId }: { messages: UIMessage[]; reportId?: string } = await req.json();
 
-  // Build the system prompt — optionally enriched with report context
-  let systemPrompt = REPORT_SYSTEM_PROMPT;
+    // Build the system prompt — optionally enriched with report context
+    let systemPrompt = REPORT_SYSTEM_PROMPT;
 
-  if (reportId) {
-    const record = await getReportAction(reportId);
+    if (reportId) {
+      const record = await getReportAction(reportId);
 
-    if (record?.reportData) {
-      systemPrompt = [
-        systemPrompt,
-        '',
-        '--- CONTEXTO DO RELATÓRIO GERADO ---',
-        `Artista: ${record.artist}`,
-        `Faixa: ${record.trackTitle}`,
-        '',
-        'O seguinte é o relatório de análise já gerado para referência:',
-        JSON.stringify(record.reportData, null, 2),
-        '--- FIM DO CONTEXTO ---',
-        '',
-        'Use o relatório acima como base para responder às perguntas do usuário.',
-        'Responda de forma conversacional, mas mantenha a precisão técnica.',
-      ].join('\n');
+      if (record?.reportData) {
+        systemPrompt = [
+          systemPrompt,
+          '',
+          '--- CONTEXTO DO RELATÓRIO GERADO ---',
+          `Artista: ${record.artist}`,
+          `Faixa: ${record.trackTitle}`,
+          '',
+          'O seguinte é o relatório de análise já gerado para referência:',
+          JSON.stringify(record.reportData, null, 2),
+          '--- FIM DO CONTEXTO ---',
+          '',
+          'Use o relatório acima como base para responder às perguntas do usuário.',
+          'Responda de forma conversacional, mas mantenha a precisão técnica.',
+        ].join('\n');
+      }
     }
+
+    const result = streamText({
+      model: google('gemini-3.1-flash-lite'),
+      messages: await convertToModelMessages(messages || []),
+      tools: {
+        google_search: google.tools.googleSearch({}),
+      },
+      system: systemPrompt,
+    });
+
+    return result.toUIMessageStreamResponse({ sendReasoning: true });
+  } catch (error: any) {
+    console.error('Error in chat route:', JSON.stringify(error));
+    return new Response(JSON.stringify({ error: 'Internal server error', details: error.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
-
-  const result = streamText({
-    model: google('gemini-3.1-flash-lite'),
-    messages: await convertToModelMessages(messages || []),
-    tools: {
-      google_search: google.tools.googleSearch({}),
-    },
-    system: systemPrompt,
-  });
-
-  return result.toUIMessageStreamResponse({ sendReasoning: true });
 }

@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "db:test": "tsx scripts/test-database.ts",
+    "studio": "prisma studio"
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.65",
@@ -21,6 +23,7 @@
     "@prisma/client": "^7.8.0",
     "@tanstack/react-query": "^5.90.21",
     "ai": "^6.0.169",
+    "cheerio": "^1.2.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^17.4.2",

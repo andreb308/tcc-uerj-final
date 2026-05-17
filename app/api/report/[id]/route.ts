@@ -43,6 +43,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         artifactData: ${JSON.stringify(report.artifactData)},`,
         tools: {
           google_search: google.tools.googleSearch({}),
+          url_context: google.tools.urlContext({}),
         },
         system: REPORT_SYSTEM_PROMPT,
         output: Output.object({ schema: reportDataSchema }),
@@ -56,13 +57,16 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         },
       });
 
+      // console.log();
+
       // access the grounding metadata. Casting to the provider metadata type
       // is optional but provides autocomplete and type safety.
       const metadata = providerMetadata?.google as GoogleGenerativeAIProviderMetadata | undefined;
       const groundingMetadata = metadata?.groundingMetadata;
       const safetyRatings = metadata?.safetyRatings;
 
-      console.log({ text, sources, groundingMetadata, safetyRatings });
+      console.log(JSON.stringify({ text, sources, groundingMetadata, safetyRatings }));
+      // console.log(JSON.stringify(response.messages));
 
       // Save the generated data and update status
       await updateReportAction(id, { reportData: output });

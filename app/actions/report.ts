@@ -1,7 +1,12 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { type ReportRecord, reportRecordSchema, type ReportData } from '@/lib/schemas/report';
+import {
+  type ReportRecord,
+  reportRecordSchema,
+  TargetLanguage,
+  intakeFormSchema,
+} from '@/lib/schemas/report';
 import { ReportStatus } from '@/generated/prisma/enums';
 
 // ---------------------------------------------------------------------------
@@ -10,7 +15,7 @@ import { ReportStatus } from '@/generated/prisma/enums';
 export interface CreateReportInput {
   artist: string;
   trackTitle: string;
-  targetLanguage: string;
+  targetLanguage: TargetLanguage;
   artifactData: string;
 }
 
@@ -19,13 +24,16 @@ export interface CreateReportInput {
  * Returns the generated `{ id }`.
  */
 export async function createReportAction(input: CreateReportInput): Promise<{ id: string }> {
+  // Validate input data using the shared schema to prevent HTML manipulation bypass
+  const validated = intakeFormSchema.parse(input);
+
   const report = await prisma.report.create({
     data: {
       status: 'pending',
-      artist: input.artist,
-      trackTitle: input.trackTitle,
-      targetLanguage: input.targetLanguage,
-      artifactData: input.artifactData,
+      artist: validated.artist,
+      trackTitle: validated.trackTitle,
+      targetLanguage: validated.targetLanguage,
+      artifactData: validated.artifactData,
     },
   });
 
@@ -96,7 +104,7 @@ export async function setReportStatusAction(
  */
 export async function getAllReportsAction(): Promise<ReportRecord[]> {
   const reports = await prisma.report.findMany({
-    orderBy: { createdAt: 'asc' },
+    orderBy: { createdAt: 'desc' },
   });
 
   return reports.map((r) => reportRecordSchema.parse(r));

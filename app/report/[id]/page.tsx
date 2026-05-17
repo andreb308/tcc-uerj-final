@@ -205,7 +205,6 @@ export default function ReportPage() {
   //     console.log('%c[RESPONSE]', 'color: lime; font-weight: bold', text.join('\n'));
   // }, [messages]);
 
-  // -- Dialect map SVG helpers --
   const mapPoints = reportData.dataMetrics.dialectMap;
   const angleStep = (2 * Math.PI) / mapPoints.length;
   // Offset by -π/2 so the first axis points up
@@ -220,6 +219,22 @@ export default function ReportPage() {
       return `${x},${y}`;
     })
     .join(' ');
+
+  const maxPolygonPoints = mapPoints
+    .map((_, i) => {
+      const { x, y } = toXY(100, i);
+      return `${x},${y}`;
+    })
+    .join(' ');
+
+  const getPointsAtPercent = (percent: number) => {
+    return mapPoints
+      .map((_, i) => {
+        const { x, y } = toXY(percent, i);
+        return `${x},${y}`;
+      })
+      .join(' ');
+  };
 
   return (
     <main className="grow flex flex-col w-full max-w-[1400px] mx-auto p-0 md:p-8 lg:p-12">
@@ -359,6 +374,41 @@ export default function ReportPage() {
                   <div className="h-full w-px bg-ink/20 absolute"></div>
                 </div>
                 <svg className="w-full h-full overflow-visible" viewBox="0 0 100 100">
+                  {/* Faded background polygon representing absolute maximum bounds (100) */}
+                  <polygon
+                    fill="rgba(0,0,0,0.02)"
+                    points={maxPolygonPoints}
+                    stroke="rgba(0,0,0,0.2)"
+                    strokeWidth="1"
+                    strokeDasharray="2,2"
+                  />
+                  {/* Concentric Grid polygons at 25%, 50%, 75% */}
+                  {[25, 50, 75].map((percent) => (
+                    <polygon
+                      key={percent}
+                      fill="none"
+                      points={getPointsAtPercent(percent)}
+                      stroke="rgba(0,0,0,0.15)"
+                      strokeWidth="0.75"
+                      strokeDasharray="1,3"
+                    />
+                  ))}
+                  {/* Axis Grid Lines from Center to outer maximum bounds */}
+                  {mapPoints.map((_, i) => {
+                    const { x, y } = toXY(100, i);
+                    return (
+                      <line
+                        key={i}
+                        x1="50"
+                        y1="50"
+                        x2={x}
+                        y2={y}
+                        stroke="rgba(0,0,0,0.1)"
+                        strokeWidth="1"
+                        strokeDasharray="1,2"
+                      />
+                    );
+                  })}
                   <polygon
                     fill="rgba(0,0,0,0.1)"
                     points={polygonPoints}

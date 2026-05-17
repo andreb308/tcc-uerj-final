@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { findLyrics } from './lyricSearch';
 
 export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -7,7 +8,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!songId || isNaN(songId)) {
     return NextResponse.json({ error: 'Invalid song ID' }, { status: 400 });
   }
-
+  
   const artist = request.nextUrl.searchParams.get('artist');
   const title = request.nextUrl.searchParams.get('title');
 
@@ -16,17 +17,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   }
 
   try {
-    const res = await fetch(`https://api.lyrics.ovh/v1/${encodeURIComponent(artist)}/${encodeURIComponent(title)}`);
-    
-    if (!res.ok) {
-      if (res.status === 404) {
-        return NextResponse.json({ lyrics: [], title, artist });
-      }
-      throw new Error(`Lyrics API responded with status ${res.status}`);
-    }
-
-    const data = await res.json();
-    const rawLyrics = data.lyrics || '';
+    const rawLyrics: string = await findLyrics(title, artist);
 
     // Parse raw lyrics into structured lines
     const lines = rawLyrics.split('\n').filter((line: string) => line.trim() !== '');
@@ -43,7 +34,9 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     });
 
     // Filter out empty text lines (section headers become annotation-only)
-    const lyrics = lyricsData.filter((l: { text: string; annotation?: string }) => l.text !== '' || l.annotation);
+    const lyrics = lyricsData.filter(
+      (l: { text: string; annotation?: string }) => l.text !== '' || l.annotation
+    );
 
     return NextResponse.json({
       lyrics,

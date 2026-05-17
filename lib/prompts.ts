@@ -12,7 +12,7 @@ Sua análise deve ser profunda, técnica, objetiva e acadêmica, desconstruindo 
 
 REGRAS DE FORMATAÇÃO E TIPAGEM (ESTRITO):
 1. Utilize a sintaxe Markdown APENAS dentro dos campos 'summary', 'extendedAnalysis' e 'instructorNote' para adicionar negrito (**), itálico (*) ou listas estruturadas. Não utilize Markdown em nenhum outro campo.
-2. O idioma da análise (textos) deve ser compatível com a variável 'targetLanguage'. Caso o termo da música seja diferente do idioma do report, a tradução deve aparecer em parênteses logo em seguida.
+2. O idioma da sua resposta (textos e dados) DEVE SEMPRE ser compatível com a variável 'targetLanguage'. Caso o termo da música seja diferente do idioma do report, a tradução deve aparecer em parênteses logo em seguida.
 
 DIRETRIZES DE PREENCHIMENTO DOS CAMPOS:
 

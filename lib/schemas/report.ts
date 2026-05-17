@@ -59,6 +59,35 @@ export type DialectMapEntry = z.infer<typeof dialectMapEntrySchema>;
 export type Idiom = z.infer<typeof idiomSchema>;
 
 // ---------------------------------------------------------------------------
+// Enumerations
+// ---------------------------------------------------------------------------
+
+export enum TargetLanguage {
+  English = 'ENGLISH',
+  Portuguese = 'PORTUGUESE',
+  Spanish = 'SPANISH',
+  French = 'FRENCH',
+  German = 'GERMAN',
+  Japanese = 'JAPANESE',
+  Russian = 'RUSSIAN'
+}
+
+// ---------------------------------------------------------------------------
+// Form schemas
+// ---------------------------------------------------------------------------
+
+export const intakeFormSchema = z.object({
+  artist: z.string().min(1, 'Artist name is required'),
+  trackTitle: z.string().min(1, 'Track title is required'),
+  targetLanguage: z.enum(TargetLanguage, {
+    message: 'Invalid target language selected',
+  }),
+  artifactData: z.string().min(1, 'Lyrics data is required — select a song and extract lyrics'),
+});
+
+export type IntakeFormData = z.infer<typeof intakeFormSchema>;
+
+// ---------------------------------------------------------------------------
 // Full envelope schema
 // ---------------------------------------------------------------------------
 
@@ -67,7 +96,7 @@ export const reportRecordSchema = z.object({
   status: z.enum(['pending', 'generating', 'complete', 'error']),
   artist: z.string(),
   trackTitle: z.string(),
-  targetLanguage: z.string(),
+  targetLanguage: z.enum(TargetLanguage),
   artifactData: z.string(),
   reportData: reportDataSchema.nullable(),
   createdAt: z.date(),

@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { TargetLanguage, intakeFormSchema, type IntakeFormData } from '@/lib/schemas/report';
 
 import { useRouter } from 'next/navigation';
 import { ArrowRightIcon } from '@phosphor-icons/react';
@@ -21,21 +22,21 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Combobox,
+  ComboboxInput,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+} from '@/components/ui/combobox';
 import dynamic from 'next/dynamic';
 import type { LyricLine } from './lyrics-modal';
 
 // Lazily load the LyricsModal component to reduce the initial JavaScript bundle size.
 const LyricsModal = dynamic(() => import('./lyrics-modal').then((mod) => mod.LyricsModal));
 
-// --- Form validation schema ---
-const intakeFormSchema = z.object({
-  artist: z.string().min(1, 'Artist name is required'),
-  trackTitle: z.string().min(1, 'Track title is required'),
-  targetLanguage: z.string().min(1, 'Target language is required'),
-  artifactData: z.string().min(1, 'Lyrics data is required — select a song and extract lyrics'),
-});
-
-type IntakeFormData = z.infer<typeof intakeFormSchema>;
+// Note: intakeFormSchema and IntakeFormData are now imported from @/lib/schemas/report
 
 interface FormFieldRowProps {
   label: string;
@@ -59,9 +60,9 @@ function FormFieldRow({ label, htmlFor, children }: FormFieldRowProps) {
   );
 }
 
-interface DiscogsArtist {
-  id: number;
-  title: string;
+interface MBArtistResult {
+  id: string;
+  name: string;
 }
 
 interface GeniusSong {
@@ -73,6 +74,9 @@ interface GeniusSong {
 
 export function IntakeForm() {
   const router = useRouter();
+  // artistInputValue drives the combobox input and the debounced search query
+  const [artistInputValue, setArtistInputValue] = useState('');
+  const [songInputValue, setSongInputValue] = useState('');
   const [debouncedArtist, setDebouncedArtist] = useState('');
   const [debouncedSong, setDebouncedSong] = useState('');
   const [selectedSong, setSelectedSong] = useState<GeniusSong | null>(null);
@@ -82,87 +86,55 @@ export function IntakeForm() {
     defaultValues: {
       artist: '',
       trackTitle: '',
-      targetLanguage: 'simple-english',
+      targetLanguage: TargetLanguage.English,
       artifactData: '',
     },
   });
 
-  const artistInput = watch('artist');
-  const songInput = watch('trackTitle');
   const artifactData = watch('artifactData');
 
-  // Update debounced values after 1 second of no typing
+  // Debounce the artist input before firing the API query
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedArtist(artistInput);
-    }, 1000);
+      setDebouncedArtist(artistInputValue);
+    }, 200);
     return () => clearTimeout(timer);
-  }, [artistInput]);
+  }, [artistInputValue]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSong(songInput);
-    }, 1000);
+      setDebouncedSong(songInputValue);
+    }, 200);
     return () => clearTimeout(timer);
-  }, [songInput]);
+  }, [songInputValue]);
 
   const { data: artistResults = [] } = useQuery({
     queryKey: ['artist-search', debouncedArtist],
     queryFn: async () => {
       if (!debouncedArtist) return [];
-      const searchParams = new URLSearchParams({
-        q: debouncedArtist,
-        type: 'artist',
-        key: process.env.DISCOGS_API_KEY || '',
-        secret: process.env.DISCOGS_SECRET || '',
-        per_page: '5',
-        page: '0',
-      });
-      const res = await fetch(`https://api.discogs.com/database/search?${searchParams.toString()}`);
+      const params = new URLSearchParams({ q: debouncedArtist.trim() });
+      const res = await fetch(`/api/artists/search?${params}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
-      let results: DiscogsArtist[] = data.results || [];
-      const lowerQuery = debouncedArtist.toLowerCase().trim();
-
-      // Parse the artist titles to remove any parenthesis
-      results = results.map((artist) => ({
-        ...artist,
-        title: artist.title.replace(/\s*\([^)]*\)$/, '').trim(),
-      }));
-
-      // Filter out exact matches (case-insensitive)
-      results = results.filter((artist) => artist.title.toLowerCase() !== lowerQuery);
-
-      return results.sort((a, b) => {
-        const aLower = a.title.toLowerCase();
-        const bLower = b.title.toLowerCase();
-
-        const aStarts = aLower.startsWith(lowerQuery);
-        const bStarts = bLower.startsWith(lowerQuery);
-
-        if (aStarts && !bStarts) return -1;
-        if (!aStarts && bStarts) return 1;
-
-        return a.title.localeCompare(b.title);
-      });
+      return (data.results ?? []) as MBArtistResult[];
     },
     enabled: debouncedArtist.trim().length >= 1,
-    // Add a refetchInterval if the strict requirement is to poll every second.
-    // Assuming "every second without typing" means 1 second debounce.
   });
 
   const { data: songResults = [] } = useQuery({
-    queryKey: ['song-search', debouncedSong],
+    queryKey: ['song-search', debouncedSong, artistInputValue],
     queryFn: async () => {
-      if (!debouncedSong) return [];
-      const params = new URLSearchParams({ q: debouncedSong });
-      if (artistInput.trim()) params.set('artist', artistInput.trim());
+      if (!debouncedSong.trim() && !artistInputValue.trim()) return [];
+      const params = new URLSearchParams({
+        q: debouncedSong.trim(),
+        artist: artistInputValue.trim(),
+      });
       const res = await fetch(`/api/songs/search?${params}`);
       if (!res.ok) throw new Error('Failed to fetch');
       const data = await res.json();
       return (data.results || []) as GeniusSong[];
     },
-    enabled: debouncedSong.trim().length >= 1,
+    enabled: debouncedSong.trim().length >= 0,
   });
 
   const handleLyricsConfirm = (lines: LyricLine[]) => {
@@ -206,57 +178,74 @@ export function IntakeForm() {
     <form onSubmit={handleSubmit(onValid, onInvalid)} className="flex min-h-0 flex-1 flex-col">
       {/* Artist ID */}
       <FormFieldRow label="Artist_ID" htmlFor="artist-id">
-        <Input
-          id="artist-id"
-          list="artist-suggestions"
-          placeholder="ENTER_NAME..."
-          {...register('artist')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') e.preventDefault();
+        <Combobox
+          items={artistResults.map((a) => a.name)}
+          inputValue={artistInputValue}
+          onInputValueChange={(val) => setArtistInputValue(val)}
+          onValueChange={(name) => {
+            if (name) setValue('artist', name as string, { shouldValidate: true });
           }}
-          className="h-full w-full border-0 bg-transparent text-sm placeholder:uppercase placeholder:text-muted-foreground/50 focus-visible:ring-0"
-        />
-        <datalist id="artist-suggestions">
-          {artistResults.map((artist: DiscogsArtist) => (
-            <option key={artist.id} value={artist.title} />
-          ))}
-        </datalist>
+        >
+          <ComboboxInput
+            id="artist-id"
+            placeholder="ENTER_NAME..."
+            showTrigger={false}
+            className="h-full w-full border-0 bg-transparent text-sm placeholder:uppercase placeholder:text-muted-foreground/50 focus-visible:ring-0"
+          />
+          <ComboboxContent>
+            <ComboboxList>
+              <ComboboxEmpty>The list is empty.</ComboboxEmpty>
+              {artistResults.map((artist) => (
+                <ComboboxItem key={artist.id} value={artist.name}>
+                  {artist.name}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       </FormFieldRow>
 
       {/* Track Title */}
       <FormFieldRow label="Track_Title" htmlFor="track-title">
-        <Input
-          id="track-title"
-          list="song-suggestions"
-          autoComplete="off"
-          placeholder="ENTER_TITLE..."
-          {...register('trackTitle', {
-            onChange: (e) => {
-              const value = e.target.value;
-
-              // Check if user selected something from datalist
-              const song = songResults.find((s: GeniusSong) => s.title === value);
-              if (song) {
-                setSelectedSong(song);
-                setValue('artifactData', '');
-              } else if (selectedSong && value !== selectedSong.title) {
-                setSelectedSong(null);
-                setValue('artifactData', '');
-              }
-            },
-          })}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') e.preventDefault();
+        <Combobox
+          items={songResults.map((s) => s.title)}
+          inputValue={songInputValue}
+          onInputValueChange={(val) => {
+            setSongInputValue(val);
+            setValue('trackTitle', val);
+            // Clear selected song if user edits the input manually
+            if (selectedSong && val !== selectedSong.title) {
+              setSelectedSong(null);
+              setValue('artifactData', '');
+            }
           }}
-          className="h-full w-full border-0 bg-transparent text-sm placeholder:uppercase placeholder:text-muted-foreground/50 focus-visible:ring-0"
-        />
-        <datalist id="song-suggestions">
-          {songResults.map((song: GeniusSong) => (
-            <option key={song.id} value={song.title}>
-              {song.title}
-            </option>
-          ))}
-        </datalist>
+          onValueChange={(title) => {
+            if (!title) return;
+            const song = songResults.find((s) => s.title === (title as string));
+            if (song) {
+              setValue('trackTitle', song.title, { shouldValidate: true });
+              setSelectedSong(song);
+              setValue('artifactData', '');
+            }
+          }}
+        >
+          <ComboboxInput
+            id="track-title"
+            placeholder="ENTER_TITLE..."
+            showTrigger={false}
+            className="h-full w-full border-0 bg-transparent text-sm placeholder:uppercase placeholder:text-muted-foreground/50 focus-visible:ring-0"
+          />
+          <ComboboxContent>
+            <ComboboxList>
+              <ComboboxEmpty>The list is empty.</ComboboxEmpty>
+              {songResults.map((song) => (
+                <ComboboxItem key={song.id} value={song.title}>
+                  {song.title}
+                </ComboboxItem>
+              ))}
+            </ComboboxList>
+          </ComboboxContent>
+        </Combobox>
       </FormFieldRow>
 
       {/* Target Language — controlled via Controller since base-ui Select doesn't expose a native ref */}
@@ -270,12 +259,11 @@ export function IntakeForm() {
                 <SelectValue placeholder="Select language..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="simple-english">Simple English</SelectItem>
-                <SelectItem value="portuguese">Portuguese</SelectItem>
-                <SelectItem value="spanish">Spanish</SelectItem>
-                <SelectItem value="french">French</SelectItem>
-                <SelectItem value="german">German</SelectItem>
-                <SelectItem value="japanese">Japanese</SelectItem>
+                {Object.entries(TargetLanguage).map(([key, value]) => (
+                  <SelectItem key={value} value={value}>
+                    {key.replace(/([A-Z])/g, ' $1').trim()}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           )}

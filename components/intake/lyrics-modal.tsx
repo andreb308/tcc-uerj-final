@@ -33,6 +33,8 @@ interface LyricsModalProps {
 function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModalProps) {
   const { setOpen } = useModal();
   const [selectedLines, setSelectedLines] = useState<Set<number>>(new Set());
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const [selectAll, setSelectAll] = useState(false);
 
   const { data: lyricsData, isLoading } = useQuery<{
     lyrics: LyricLine[];
@@ -54,28 +56,52 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
   });
 
   const toggleLine = (index: number) => {
-    const newSelected = new Set(selectedLines);
+    if (selectAll) return;
+
+    let newSelected = new Set(selectedLines);
+
     if (newSelected.has(index)) {
       newSelected.delete(index);
     } else {
       newSelected.add(index);
     }
+
+    // Enforce contiguous sequential selection block
+    if (newSelected.size > 1) {
+      const indices = Array.from(newSelected);
+      const min = Math.min(...indices);
+      const max = Math.max(...indices);
+      
+      newSelected = new Set();
+      for (let i = min; i <= max; i++) {
+        if (lyricsData?.lyrics[i]?.text) {
+          newSelected.add(i);
+        }
+      }
+    }
+
     setSelectedLines(newSelected);
   };
 
   const handleConfirm = () => {
     if (!lyricsData) return;
-    const selected = Array.from(selectedLines)
-      .sort((a, b) => a - b) // Ensure chronological order
-      .map((index) => lyricsData.lyrics[index]);
+    
+    let selected: LyricLine[];
+    if (selectAll) {
+      selected = lyricsData.lyrics.filter(l => l.text);
+    } else {
+      selected = Array.from(selectedLines)
+        .sort((a, b) => a - b) // Ensure chronological order
+        .map((index) => lyricsData.lyrics[index]);
+    }
 
     onConfirm(selected);
     setOpen(false);
   };
 
   return (
-    <ModalBody className="md:max-w-3xl min-h-[80vh] flex flex-col p-0">
-      <div className="border-b border-border bg-muted/50 p-6 z-10">
+    <ModalBody className="md:max-w-3xl h-[85vh] flex flex-col p-0">
+      <div className="border-b border-border bg-muted/50 p-6 z-10 shrink-0">
         <h4 className="font-display text-2xl font-bold uppercase tracking-tight">
           Select Evidence
         </h4>
@@ -84,7 +110,7 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
         </p>
       </div>
 
-      <ModalContent className="flex-1 overflow-hidden p-0 rounded-none bg-paper">
+      <ModalContent className="flex-1 min-h-0 flex flex-col p-0 rounded-none bg-paper">
         {isLoading ? (
           <div className="flex flex-1 items-center justify-center p-12">
             <div className="flex flex-col items-center gap-4">
@@ -104,7 +130,8 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
             </p>
           </div>
         ) : (
-          <ScrollArea className="h-[720px] [&>div]:h-3/4 w-full relative flex flex-col gap-1 p-0">
+          <ScrollArea className="flex-1 min-h-0 w-full">
+            <div className="p-4 flex flex-col gap-1">
             {lyricsData.lyrics.map((line, index) => {
               const isSelected = selectedLines.has(index);
 
@@ -125,18 +152,18 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
                   onClick={() => toggleLine(index)}
                   className={cn(
                     'group relative flex w-full items-start gap-3 rounded-sm p-3 text-left transition-colors border border-transparent',
-                    isSelected
+                    isSelected && !selectAll
                       ? 'bg-destructive/10 border-destructive/20 shadow-[0_0_0_1px_rgba(242,59,13,0.1)]'
-                      : 'hover:bg-muted/50 hover:border-border'
+                      : 'hover:bg-muted/50 hover:border-border',
+                    selectAll && 'opacity-50 pointer-events-none'
                   )}
                 >
-                  <div className="flex h-6 items-center shrink-0">
+                  <div className="flex h-6 items-center shrink-0 pointer-events-none">
                     <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => toggleLine(index)}
+                      checked={selectAll ? true : isSelected}
                       className={cn(
                         'data-[state=checked]:bg-destructive data-[state=checked]:border-destructive',
-                        !isSelected && 'opacity-0 group-hover:opacity-100 transition-opacity'
+                        !isSelected && !selectAll && 'opacity-0 group-hover:opacity-100 transition-opacity'
                       )}
                       aria-label={`Select line ${line.number}`}
                     />
@@ -157,7 +184,7 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
                     <span
                       className={cn(
                         'font-display text-lg font-medium transition-colors',
-                        isSelected ? 'text-destructive' : 'text-foreground'
+                        isSelected || selectAll ? 'text-destructive' : 'text-foreground'
                       )}
                     >
                       {line.text}
@@ -166,14 +193,29 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
                 </button>
               );
             })}
+            </div>
           </ScrollArea>
         )}
       </ModalContent>
 
-      <ModalFooter className="border-t border-border bg-muted/50 px-6 py-4 flex items-center justify-between shrink-0 rounded-none w-full relative z-60">
-        <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground hidden sm:inline-block">
-          {selectedLines.size} {selectedLines.size === 1 ? 'Line' : 'Lines'} Selected
-        </span>
+      <ModalFooter className="border-t border-border bg-muted/50 px-6 py-4 flex flex-col sm:flex-row items-center justify-between shrink-0 rounded-none w-full relative z-60 gap-4">
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          <label className="flex items-center gap-2 cursor-pointer group">
+            <Checkbox 
+              checked={selectAll}
+              onCheckedChange={(checked) => setSelectAll(checked === true)}
+              className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
+            />
+            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground group-hover:text-foreground transition-colors">
+              Select Entire Song
+            </span>
+          </label>
+          {!selectAll && (
+            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground hidden sm:inline-block ml-4 border-l border-border pl-4">
+              {selectedLines.size} {selectedLines.size === 1 ? 'Line' : 'Lines'} Selected
+            </span>
+          )}
+        </div>
         <div className="flex gap-4 w-full sm:w-auto">
           <Button
             type="button"
@@ -186,7 +228,7 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
           <Button
             type="button"
             onClick={handleConfirm}
-            disabled={selectedLines.size === 0}
+            disabled={!selectAll && selectedLines.size === 0}
             className="font-mono uppercase text-xs flex-1 sm:flex-none tracking-widest bg-foreground text-background hover:bg-foreground/80 disabled:opacity-50"
           >
             Confirm

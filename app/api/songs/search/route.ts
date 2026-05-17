@@ -1,56 +1,92 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const GENIUS_API_BASE = 'https://api.genius.com';
+export interface OvhSearchResponse {
+  data: OvhTrack[];
+  total: number;
+  next?: string;
+  prev?: string; 
+}
+
+export interface OvhTrack {
+  id: number;
+  readable: boolean;
+  title: string;
+  title_short: string;
+  title_version: string;
+  isrc: string;
+  link: string;
+  duration: number;
+  rank: number;
+  explicit_lyrics: boolean;
+  explicit_content_lyrics: number;
+  explicit_content_cover: number;
+  preview: string;
+  md5_image: string;
+  artist: OvhArtist;
+  album: OvhAlbum;
+  type: string; 
+}
+
+export interface OvhArtist {
+  id: number;
+  name: string;
+  link: string;
+  picture: string;
+  picture_small: string;
+  picture_medium: string;
+  picture_big: string;
+  picture_xl: string;
+  tracklist: string;
+  type: string; 
+}
+
+export interface OvhAlbum {
+  id: number;
+  title: string;
+  cover: string;
+  cover_small: string;
+  cover_medium: string;
+  cover_big: string;
+  cover_xl: string;
+  md5_image: string;
+  tracklist: string;
+  type: string; 
+}
+
+const OVH_API_BASE = 'https://api.lyrics.ovh/suggest';
 
 export async function GET(request: NextRequest) {
-  const q = request.nextUrl.searchParams.get('q');
+  const q = request.nextUrl.searchParams.get('q') ?? '';
   const artist = request.nextUrl.searchParams.get('artist')?.trim().toLowerCase() ?? '';
 
-  if (!q || q.trim().length < 2) {
+  if (!q.trim() && !artist.trim()) {
     return NextResponse.json({ results: [] });
   }
 
-  const token = process.env.GENIUS_CLIENT_ACCESS_TOKEN;
-  if (!token) {
-    console.error('Missing GENIUS_CLIENT_ACCESS_TOKEN env variable');
-    return NextResponse.json({ results: [] }, { status: 500 });
-  }
-
   try {
-    const searchParams = new URLSearchParams({ q: `${artist} - ${q.trim()}`, per_page: '10' });
-    const res = await fetch(`${GENIUS_API_BASE}/search?${searchParams}`, {
-      headers: { Authorization: `Bearer ${token}` },
+    // Build the query: prepend artist if provided for better relevance
+    const query = artist ? `${artist} ${q.trim()}` : q.trim();
+    const res = await fetch(`${OVH_API_BASE}/${encodeURIComponent(query)}`, {
+      cache: 'no-store',
     });
 
     if (!res.ok) {
-      throw new Error(`Genius API responded with ${res.status}`);
+      throw new Error(`lyrics.ovh API responded with ${res.status}`);
     }
 
-    const data = await res.json();
-    const hits = data?.response?.hits ?? [];
+    const data: OvhSearchResponse = await res.json();
+    const tracks = data.data ?? [];
 
-    let results = hits.map(
-      (hit: {
-        result: { id: number; title: string; full_title: string; primary_artist: { name: string } };
-      }) => ({
-        id: hit.result.id,
-        title: hit.result.title,
-        artist: hit.result.primary_artist?.name ?? '',
-        fullTitle: hit.result.full_title,
-      })
-    );
-
-    if (artist) {
-      results = results.filter((song: { artist: string }) =>
-        song.artist.toLowerCase().includes(artist)
-      );
-    }
-
-    results = results.slice(0, 5);
+    const results = tracks.slice(0, 5).map((track: OvhTrack) => ({
+      id: track.id,
+      title: track.title,
+      artist: track.artist.name,
+      fullTitle: `${track.title} by ${track.artist.name}`,
+    }));
 
     return NextResponse.json({ results });
   } catch (error) {
-    console.error('Genius song search error:', error);
+    console.error('lyrics.ovh song search error:', error);
     return NextResponse.json({ results: [] }, { status: 500 });
   }
 }
