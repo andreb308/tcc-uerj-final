@@ -227,13 +227,14 @@ async function fetchHtml(
   const res = await fetch(url, {
     headers: { 'User-Agent': USER_AGENT },
     redirect: 'follow',
+    cache: 'no-store', // Disable Next.js caching to prevent prod issues
     signal: getAbortSignal(FETCH_TIMEOUT, signal),
     ...fetchOptions,
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status} from ${url}`);
   // Some sites redirect unknown songs to artist page or homepage
   if (rejectRedirects && res.redirected) {
-    throw new Error('Redirected (likely no match)');
+    throw new Error(`Redirected from ${url} (likely no match)`);
   }
   const body = await res.text();
   return cheerio.load(body);
@@ -297,10 +298,11 @@ function fromGenius(title: string, artistName: string, signal?: AbortSignal): Pr
       console.log(`[lyricSearch] Trying Genius API search: ${apiUrl}`);
       return fetch(apiUrl, {
         headers: { 'User-Agent': USER_AGENT },
+        cache: 'no-store',
         signal: getAbortSignal(FETCH_TIMEOUT, signal),
       })
         .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+          if (!res.ok) throw new Error(`HTTP ${res.status} from Genius API`);
           return res.json();
         })
         .then((data) => {
@@ -446,6 +448,27 @@ function fromParolesNet(title: string, artistName: string, signal?: AbortSignal)
 }
 
 /**
+ * lyrics.ovh - open public API
+ */
+function fromOvh(title: string, artistName: string, signal?: AbortSignal): Promise<string> {
+  const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artistName)}/${encodeURIComponent(title)}`;
+  console.log(`[lyricSearch] Trying lyrics.ovh API URL: ${url}`);
+  return fetch(url, {
+    headers: { 'User-Agent': USER_AGENT, 'Accept': 'application/json' },
+    cache: 'no-store',
+    signal: getAbortSignal(FETCH_TIMEOUT, signal),
+  })
+    .then((res) => {
+      if (!res.ok) throw new Error(`HTTP ${res.status} from lyrics.ovh`);
+      return res.json();
+    })
+    .then((data) => {
+      if (!data.lyrics) throw new Error('No lyrics in response');
+      return cleanLyrics(data.lyrics);
+    });
+}
+
+/**
  * LyricsMania - multiple URL patterns
  */
 function fromLyricsMania(title: string, artistName: string, signal?: AbortSignal): Promise<string> {
@@ -531,26 +554,40 @@ export function findLyrics(title: string, artistName: string): Promise<string> {
   const controller = new AbortController();
   const { signal } = controller;
 
+  const logError = (source: string, err: any) => {
+    if (!signal?.aborted && err.message !== 'Aborted' && err.message !== 'Aborted before start') {
+      console.warn(`[lyricSearch] ${source} failed:`, err.message);
+    }
+    throw err;
+  };
+
   const promises = [
     // Genius starts immediately
-    fromGenius(title, artistName, signal).then((l) => ({ source: 'Genius', lyrics: l })),
+    fromGenius(title, artistName, signal)
+      .then((l) => ({ source: 'Genius', lyrics: l }))
+      .catch((err) => logError('Genius', err)),
+
+    // lyrics.ovh also starts immediately alongside Genius
+    fromOvh(title, artistName, signal)
+      .then((l) => ({ source: 'lyrics.ovh', lyrics: l }))
+      .catch((err) => logError('lyrics.ovh', err)),
 
     // Other sources start with a delay (Genius advantage)
     runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
       fromAZLyrics(title, artistName, signal).then((l) => ({ source: 'AZLyrics', lyrics: l }))
-    ),
+    ).catch((err) => logError('AZLyrics', err)),
     runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
       fromParolesNet(title, artistName, signal).then((l) => ({ source: 'Paroles.net', lyrics: l }))
-    ),
+    ).catch((err) => logError('Paroles.net', err)),
     runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
       fromLyricsMania(title, artistName, signal).then((l) => ({ source: 'LyricsMania', lyrics: l }))
-    ),
+    ).catch((err) => logError('LyricsMania', err)),
     runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
       fromLetras(title, artistName, signal).then((l) => ({ source: 'Letras', lyrics: l }))
-    ),
+    ).catch((err) => logError('Letras', err)),
     runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
       fromLyricsCom(title, artistName, signal).then((l) => ({ source: 'Lyrics.com', lyrics: l }))
-    ),
+    ).catch((err) => logError('Lyrics.com', err)),
   ];
 
   // If title has parentheses/brackets, also try without them (run delayed)
@@ -565,7 +602,7 @@ export function findLyrics(title: string, artistName: string): Promise<string> {
           source: 'Fallback (Clean Title)',
           lyrics: l,
         }))
-      )
+      ).catch((err) => logError('Fallback (Clean Title)', err))
     );
   }
 
@@ -578,7 +615,7 @@ export function findLyrics(title: string, artistName: string): Promise<string> {
           source: 'Fallback (Primary Artist)',
           lyrics: l,
         }))
-      )
+      ).catch((err) => logError('Fallback (Primary Artist)', err))
     );
   }
 
