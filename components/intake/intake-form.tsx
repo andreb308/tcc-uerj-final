@@ -177,7 +177,7 @@ export function IntakeForm() {
   return (
     <form onSubmit={handleSubmit(onValid, onInvalid)} className="flex min-h-0 flex-1 flex-col">
       {/* Artist ID */}
-      <FormFieldRow label="Artist_ID" htmlFor="artist-id">
+      <FormFieldRow label="Artist_Name" htmlFor="artist-id">
         <Combobox
           items={artistResults.map((a) => a.name)}
           inputValue={artistInputValue}

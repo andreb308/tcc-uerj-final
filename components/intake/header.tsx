@@ -1,22 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { FloppyDisk } from '@phosphor-icons/react';
-
-function formatUtc(date: Date) {
-  return date.toISOString().replace('T', ' ').slice(0, 19);
-}
+import { useUtcTime } from '@/hooks/use-utc-time';
 
 export function Header() {
-  const [utcString, setUtcString] = useState(() => formatUtc(new Date()));
+  const utcString = useUtcTime();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setUtcString(formatUtc(new Date()));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   return (
     <header className="flex h-16 shrink-0 items-center justify-between border-b border-border bg-background px-6">

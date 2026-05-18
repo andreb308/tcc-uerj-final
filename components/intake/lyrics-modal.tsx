@@ -211,9 +211,20 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
             </span>
           </label>
           {!selectAll && (
-            <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground hidden sm:inline-block ml-4 border-l border-border pl-4">
-              {selectedLines.size} {selectedLines.size === 1 ? 'Line' : 'Lines'} Selected
-            </span>
+            <div className="hidden sm:flex items-center gap-4 ml-4 border-l border-border pl-4">
+              <span className="font-mono text-xs uppercase tracking-widest text-muted-foreground">
+                {selectedLines.size} {selectedLines.size === 1 ? 'Line' : 'Lines'} Selected
+              </span>
+              {selectedLines.size > 0 && (
+                <button
+                  type="button"
+                  onClick={() => setSelectedLines(new Set())}
+                  className="font-mono text-[10px] uppercase tracking-widest text-destructive hover:text-destructive/80 transition-colors underline underline-offset-4"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
           )}
         </div>
         <div className="flex gap-4 w-full sm:w-auto">

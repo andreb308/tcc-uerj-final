@@ -15,6 +15,7 @@ model Report {
   targetLanguage String
   artifactData   String       @db.Text
   reportData     Json?
+  chatHistory    Json?
   createdAt      DateTime     @default(now())
 
   @@map("reports")

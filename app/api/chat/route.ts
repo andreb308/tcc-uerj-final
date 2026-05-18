@@ -1,7 +1,7 @@
 import { streamText, UIMessage, convertToModelMessages } from 'ai';
 import { google } from '@ai-sdk/google';
 import { getReportAction } from '@/app/actions/report';
-import { REPORT_SYSTEM_PROMPT } from '@/lib/prompts';
+import { CHAT_SYSTEM_PROMPT } from '@/lib/prompts';
 
 export const maxDuration = 30;
 
@@ -17,7 +17,7 @@ export async function POST(req: Request) {
     const { messages, reportId }: { messages: UIMessage[]; reportId?: string } = await req.json();
 
     // Build the system prompt — optionally enriched with report context
-    let systemPrompt = REPORT_SYSTEM_PROMPT;
+    let systemPrompt = CHAT_SYSTEM_PROMPT;
 
     if (reportId) {
       const record = await getReportAction(reportId);
@@ -45,6 +45,7 @@ export async function POST(req: Request) {
       messages: await convertToModelMessages(messages || []),
       tools: {
         google_search: google.tools.googleSearch({}),
+        url_context: google.tools.urlContext({}),
       },
       system: systemPrompt,
     });
@@ -52,9 +53,12 @@ export async function POST(req: Request) {
     return result.toUIMessageStreamResponse({ sendReasoning: true });
   } catch (error: any) {
     console.error('Error in chat route:', JSON.stringify(error));
-    return new Response(JSON.stringify({ error: 'Internal server error', details: error.message }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    return new Response(
+      JSON.stringify({ error: 'Internal server error', details: error.message }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
   }
 }

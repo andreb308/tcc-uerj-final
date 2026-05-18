@@ -10,6 +10,7 @@
   --color-foreground: var(--foreground);
   --color-paper: var(--paper);
   --color-paper-dim: var(--paper-dim);
+  --color-ink: var(--ink);
   --color-success: var(--success);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-mono);
@@ -57,6 +58,7 @@
   --foreground: #000000;
   --paper: #f2f0eb;
   --paper-dim: #e6e4de;
+  --ink: #000;
   --card: #f2f0eb;
   --card-foreground: #000000;
   --popover: #f2f0eb;

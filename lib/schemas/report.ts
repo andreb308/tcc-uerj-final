@@ -99,6 +99,7 @@ export const reportRecordSchema = z.object({
   targetLanguage: z.enum(TargetLanguage),
   artifactData: z.string(),
   reportData: reportDataSchema.nullable(),
+  chatHistory: z.any().nullable().optional(),
   createdAt: z.date(),
 });
 

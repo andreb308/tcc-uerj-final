@@ -277,7 +277,7 @@ export default function ChatPage() {
           {/* Metadata row */}
           <div className="border-b border-border bg-paper-dim">
             <div className="flex">
-              <MetadataCell label="Artist_ID" value={METADATA.artistId} />
+              <MetadataCell label="Artist_Name" value={METADATA.artistId} />
               <MetadataCell label="Artifact" value={METADATA.artifact} />
               <MetadataCell label="Year" value={METADATA.year} hasBorder={false} />
             </div>

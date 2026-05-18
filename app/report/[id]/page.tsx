@@ -10,7 +10,7 @@ import {
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { useChat } from '@ai-sdk/react';
+
 import type { ReportRecord } from '@/lib/schemas/report';
 
 function Skeleton({ className }: { className?: string }) {
@@ -112,7 +112,7 @@ export default function ReportPage() {
 
             {/* Section 03 */}
             <div className="lg:col-span-4 flex flex-col">
-              <div className="p-4 border-b border-ink bg-ink">
+              <div className="p-4 border-b border-ink">
                 <h3 className="font-display text-lg font-bold uppercase">03 // Idiom Decoder</h3>
               </div>
               <div className="grow p-4 flex flex-col gap-4">
@@ -163,47 +163,6 @@ export default function ReportPage() {
   }
 
   const reportData = report.reportData;
-
-  const sendMessageTest = () => {
-    console.log('sendMessageTest clicked');
-
-    // sendMessage({
-    //   text: JSON.stringify({
-    //     artist: 'Taylor Swift',
-    //     song: 'cowboy like me',
-    //     lyric: `Perched in the dark
-    //             Tellin' all the rich folks anything they wanna hear
-    //             Like it could be love
-    //             I could be the way forward
-    //             Only if they pay for it
-    //             You're a bandit like me
-    //             Eyes full of stars
-    //             Hustling for the good life, never thought I'd meet you here
-    //             It could be love
-    //             We could be the way forward
-    //             And I know I'll pay for it`,
-    //   }),
-    // });
-  };
-
-  // useEffect(() => {
-  //   if (!messages.length) return;
-  //   const latest = messages[messages.length - 1];
-  //   if (latest.role !== 'assistant') return;
-
-  //   console.clear();
-  //   const reasoning = latest.parts
-  //     ?.filter((p) => p.type === 'reasoning')
-  //     .map((p) => ('text' in p ? (p.text as string) : ''));
-  //   const text = latest.parts
-  //     ?.filter((p) => p.type === 'text')
-  //     .map((p) => ('text' in p ? (p.text as string) : ''));
-
-  //   if (reasoning?.length)
-  //     console.log('%c[REASONING]', 'color: orange; font-weight: bold', reasoning.join('\n'));
-  //   if (text?.length)
-  //     console.log('%c[RESPONSE]', 'color: lime; font-weight: bold', text.join('\n'));
-  // }, [messages]);
 
   const mapPoints = reportData.dataMetrics.dialectMap;
   const angleStep = (2 * Math.PI) / mapPoints.length;
@@ -262,8 +221,7 @@ export default function ReportPage() {
                 {report.artist}
               </h1>
               <Link
-                href="#"
-                onClick={() => sendMessageTest()}
+                href={`/chat/${id}`}
                 className="print:hidden group inline-flex shrink-0 items-center gap-3 border-2 border-foreground bg-primary px-8 py-5 font-display text-base font-bold uppercase tracking-[2.5px] text-primary-foreground transition-all duration-150 hover:bg-background hover:text-foreground hover:shadow-[4px_4px_0px_0px_black]"
               >
                 <ChatCircleDotsIcon
@@ -271,7 +229,7 @@ export default function ReportPage() {
                   weight="bold"
                   aria-hidden="true"
                 />
-                Start Conversation
+                {report.chatHistory ? 'Continue' : 'Start'} Conversation
                 <ArrowRightIcon
                   className="size-5 transition-transform duration-150 group-hover:translate-x-1"
                   weight="bold"
@@ -305,7 +263,7 @@ export default function ReportPage() {
             </h3>
             <div className="prose prose-sm prose-p:font-mono prose-p:text-justify max-w-none">
               <p className="mb-4 text-base leading-relaxed">
-                <span className="bg-ink px-1 font-bold mr-1">SUMMARY:</span>
+                <span className="text-foreground px-1 font-bold mr-1">SUMMARY:</span>
                 {reportData.thesis.summary}
               </p>
               <p className="text-sm text-muted-foreground leading-relaxed">
@@ -453,7 +411,7 @@ export default function ReportPage() {
 
           {/* Section 03 — Idiom Decoder */}
           <div className="lg:col-span-4 flex flex-col">
-            <div className="p-4 border-b border-ink bg-ink">
+            <div className="p-4 border-b border-ink">
               <h3 className="font-display text-lg font-bold uppercase">03 // Idiom Decoder</h3>
             </div>
             <div className="grow overflow-hidden">

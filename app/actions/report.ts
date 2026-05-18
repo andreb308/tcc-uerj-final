@@ -109,3 +109,21 @@ export async function getAllReportsAction(): Promise<ReportRecord[]> {
 
   return reports.map((r) => reportRecordSchema.parse(r));
 }
+
+/**
+ * Persists the chat messages array (UIMessage[]) as JSON on the report record.
+ */
+export async function saveChatHistoryAction(
+  reportId: string,
+  chatHistory: unknown
+): Promise<{ success: boolean }> {
+  try {
+    await prisma.report.update({
+      where: { id: reportId },
+      data: { chatHistory: chatHistory as any },
+    });
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+}
