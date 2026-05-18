@@ -10,7 +10,7 @@ import { REPORT_SYSTEM_PROMPT } from '@/lib/prompts';
 import { reportDataSchema } from '@/lib/schemas/report';
 import { ReportStatus } from '@/generated/prisma/enums';
 
-export const maxDuration = 300; // Set to 300 seconds
+export const maxDuration = 30; // Set to 30 seconds
 // ---------------------------------------------------------------------------
 // GET /api/report/[id] — Retrieve a report record
 // ---------------------------------------------------------------------------
