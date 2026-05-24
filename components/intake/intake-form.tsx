@@ -108,7 +108,7 @@ export function IntakeForm() {
     return () => clearTimeout(timer);
   }, [songInputValue]);
 
-  const { data: artistResults = [] } = useQuery({
+  const { data: artistResults = [], isFetching } = useQuery({
     queryKey: ['artist-search', debouncedArtist],
     queryFn: async () => {
       if (!debouncedArtist) return [];
@@ -121,7 +121,7 @@ export function IntakeForm() {
     enabled: debouncedArtist.trim().length >= 1,
   });
 
-  const { data: songResults = [] } = useQuery({
+  const { data: songResults = [], isFetching: isSongFetching } = useQuery({
     queryKey: ['song-search', debouncedSong, artistInputValue],
     queryFn: async () => {
       if (!debouncedSong.trim() && !artistInputValue.trim()) return [];
@@ -194,7 +194,7 @@ export function IntakeForm() {
           />
           <ComboboxContent>
             <ComboboxList>
-              <ComboboxEmpty>The list is empty.</ComboboxEmpty>
+              <ComboboxEmpty>{isFetching ? 'Loading...' : 'The list is empty.'}</ComboboxEmpty>
               {artistResults.map((artist) => (
                 <ComboboxItem key={artist.id} value={artist.name}>
                   {artist.name}
@@ -237,7 +237,7 @@ export function IntakeForm() {
           />
           <ComboboxContent>
             <ComboboxList>
-              <ComboboxEmpty>The list is empty.</ComboboxEmpty>
+              <ComboboxEmpty>{isSongFetching ? 'Loading...' : 'The list is empty.'}</ComboboxEmpty>
               {songResults.map((song) => (
                 <ComboboxItem key={song.id} value={song.title}>
                   {song.title}
