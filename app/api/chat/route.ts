@@ -49,6 +49,7 @@ export async function POST(req: Request) {
       model: openrouter.chat('google/gemini-3.1-flash-lite'),
       messages: await convertToModelMessages(messages || []),
       tools: {
+        //@ts-expect-error
         web_search: openrouter.tools.webSearch({ needsApproval: false }),
       },
       system: systemPrompt,

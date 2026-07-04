@@ -82,6 +82,12 @@ export async function GET(request: NextRequest) {
       title: track.title,
       artist: track.artist.name,
       fullTitle: `${track.title} by ${track.artist.name}`,
+      albumCover: track.album ? {
+        small: track.album.cover_small,
+        medium: track.album.cover_medium,
+        big: track.album.cover_big,
+        xl: track.album.cover_xl,
+      } : null,
     }));
 
     return NextResponse.json({ results });

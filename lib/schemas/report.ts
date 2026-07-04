@@ -72,6 +72,15 @@ export enum TargetLanguage {
   Russian = 'RUSSIAN'
 }
 
+export const albumCoverSchema = z.object({
+  small: z.string().optional(),
+  medium: z.string().optional(),
+  big: z.string().optional(),
+  xl: z.string().optional(),
+}).optional().nullable();
+
+export type AlbumCover = z.infer<typeof albumCoverSchema>;
+
 // ---------------------------------------------------------------------------
 // Form schemas
 // ---------------------------------------------------------------------------
@@ -83,6 +92,7 @@ export const intakeFormSchema = z.object({
     message: 'Invalid target language selected',
   }),
   artifactData: z.string().min(1, 'Lyrics data is required — select a song and extract lyrics'),
+  albumCover: albumCoverSchema,
 });
 
 export type IntakeFormData = z.infer<typeof intakeFormSchema>;
@@ -98,6 +108,7 @@ export const reportRecordSchema = z.object({
   trackTitle: z.string(),
   targetLanguage: z.enum(TargetLanguage),
   artifactData: z.string(),
+  albumCover: albumCoverSchema,
   reportData: reportDataSchema.nullable(),
   chatHistory: z.any().nullable().optional(),
   createdAt: z.date(),

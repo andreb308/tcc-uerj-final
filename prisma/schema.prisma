@@ -14,6 +14,7 @@ model Report {
   trackTitle     String
   targetLanguage String
   artifactData   String       @db.Text
+  albumCover     Json?
   reportData     Json?
   chatHistory    Json?
   createdAt      DateTime     @default(now())

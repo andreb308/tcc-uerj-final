@@ -222,7 +222,7 @@ export default function ReportPage() {
                   <img
                     alt="Album Cover"
                     className="size-32 md:size-48 object-cover pointer-events-none"
-                    src="https://placehold.co/600x600?text=Album+Cover"
+                    src={report.albumCover?.medium || report.albumCover?.big || report.albumCover?.small || "https://placehold.co/600x600?text=Album+Cover"}
                   />
                 </ModalTrigger>
                 <ModalBody className="bg-white border-2 border-ink p-2 rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-center items-center">
@@ -230,7 +230,7 @@ export default function ReportPage() {
                     <img
                       alt="Album Cover Fullscreen"
                       className="max-w-full max-h-full object-contain border border-ink"
-                      src="https://placehold.co/1024x1024?text=Album+Cover"
+                      src={report.albumCover?.xl || report.albumCover?.big || report.albumCover?.medium || "https://placehold.co/1024x1024?text=Album+Cover"}
                     />
                   </ModalContent>
                 </ModalBody>

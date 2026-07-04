@@ -6,6 +6,7 @@ import {
   reportRecordSchema,
   TargetLanguage,
   intakeFormSchema,
+  type AlbumCover,
 } from '@/lib/schemas/report';
 import { ReportStatus } from '@/generated/prisma/enums';
 
@@ -17,6 +18,7 @@ export interface CreateReportInput {
   trackTitle: string;
   targetLanguage: TargetLanguage;
   artifactData: string;
+  albumCover?: AlbumCover;
 }
 
 /**
@@ -34,6 +36,7 @@ export async function createReportAction(input: CreateReportInput): Promise<{ id
       trackTitle: validated.trackTitle,
       targetLanguage: validated.targetLanguage,
       artifactData: validated.artifactData,
+      albumCover: validated.albumCover || undefined,
     },
   });
 

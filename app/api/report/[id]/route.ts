@@ -42,6 +42,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         targetLanguage: '${report.targetLanguage}',
         artifactData: ${JSON.stringify(report.artifactData)},`,
         tools: {
+          //@ts-expect-error
           web_search: openrouter.tools.webSearch({ needsApproval: false }),
         },
         system: REPORT_SYSTEM_PROMPT,
@@ -62,7 +63,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       // const groundingMetadata = metadata?.groundingMetadata;
       // const safetyRatings = metadata?.safetyRatings;
 
-      console.log(JSON.stringify({ text, sources}));
+      console.log(JSON.stringify({ text, sources }));
       // console.log(JSON.stringify(response.messages));
 
       // Save the generated data and update status

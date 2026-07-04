@@ -32,6 +32,7 @@ import {
 } from '@/components/ui/combobox';
 import dynamic from 'next/dynamic';
 import type { LyricLine } from './lyrics-modal';
+import Image from 'next/image';
 
 // Lazily load the LyricsModal component to reduce the initial JavaScript bundle size.
 const LyricsModal = dynamic(() => import('./lyrics-modal').then((mod) => mod.LyricsModal));
@@ -70,6 +71,12 @@ interface GeniusSong {
   title: string;
   artist: string;
   fullTitle: string;
+  albumCover?: {
+    small?: string;
+    medium?: string;
+    big?: string;
+    xl?: string;
+  } | null;
 }
 
 export function IntakeForm() {
@@ -88,6 +95,7 @@ export function IntakeForm() {
       trackTitle: '',
       targetLanguage: TargetLanguage.English,
       artifactData: '',
+      albumCover: null,
     },
   });
 
@@ -217,6 +225,7 @@ export function IntakeForm() {
             if (selectedSong && val !== selectedSong.title) {
               setSelectedSong(null);
               setValue('artifactData', '');
+              setValue('albumCover', null);
             }
           }}
           onValueChange={(title) => {
@@ -226,6 +235,7 @@ export function IntakeForm() {
               setValue('trackTitle', song.title, { shouldValidate: true });
               setSelectedSong(song);
               setValue('artifactData', '');
+              setValue('albumCover', song.albumCover || null, { shouldValidate: true });
             }
           }}
         >
@@ -239,8 +249,26 @@ export function IntakeForm() {
             <ComboboxList>
               <ComboboxEmpty>{isSongFetching ? 'Loading...' : 'The list is empty.'}</ComboboxEmpty>
               {songResults.map((song) => (
-                <ComboboxItem key={song.id} value={song.title}>
-                  {song.title}
+                <ComboboxItem key={song.id} value={song.title} className="pl-2">
+                  {song.albumCover?.small ? (
+                    <div className="relative size-10 shrink-0 overflow-hidden rounded-sm border border-border">
+                      <Image
+                        src={song.albumCover.small}
+                        alt={`${song.title} album cover`}
+                        fill
+                        className="object-cover"
+                        sizes="40px"
+                      />
+                    </div>
+                  ) : (
+                    <div className="size-10 shrink-0 rounded-sm border border-border bg-muted flex items-center justify-center text-[10px] text-muted-foreground uppercase font-mono">
+                      No Art
+                    </div>
+                  )}
+                  <div className="flex flex-col min-w-0 leading-tight">
+                    <span className="truncate font-semibold text-foreground">{song.title}</span>
+                    <span className="truncate text-[10px] text-muted-foreground">{song.artist}</span>
+                  </div>
                 </ComboboxItem>
               ))}
             </ComboboxList>
@@ -301,6 +329,17 @@ export function IntakeForm() {
           <div className="flex min-h-64 flex-1 flex-col items-center justify-center bg-background p-6">
             {selectedSong ? (
               <div className="flex flex-col items-center gap-6">
+                {selectedSong.albumCover?.medium && (
+                  <div className="relative size-32 overflow-hidden rounded-md border border-border shadow-md">
+                    <Image
+                      src={selectedSong.albumCover.medium}
+                      alt={`${selectedSong.title} album cover`}
+                      fill
+                      className="object-cover"
+                      sizes="128px"
+                    />
+                  </div>
+                )}
                 <div className="flex flex-col items-center gap-2">
                   <div className="flex items-center gap-2 text-destructive">
                     <span className="h-2 w-2 rounded-full bg-destructive animate-pulse" />
@@ -308,7 +347,10 @@ export function IntakeForm() {
                       Target Acquired
                     </span>
                   </div>
-                  <span className="font-mono text-[10px] uppercase text-muted-foreground">
+                  <span className="font-mono text-[10px] uppercase text-muted-foreground text-center max-w-[280px] truncate">
+                    {selectedSong.title} by {selectedSong.artist}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase text-muted-foreground/60">
                     Protocol ready for extraction
                   </span>
                 </div>

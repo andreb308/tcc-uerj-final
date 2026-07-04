@@ -11,6 +11,8 @@
     "lint": "eslint",
     "format": "prettier --write .",
     "db:test": "tsx scripts/test-database.ts",
+    "db:dump": "tsx scripts/dump-db.ts",
+    "db:restore": "tsx scripts/restore-db.ts",
     "studio": "prisma studio"
   },
   "dependencies": {
