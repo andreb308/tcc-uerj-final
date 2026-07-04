@@ -1,14 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getReportAction, updateReportAction, setReportStatusAction } from '@/app/actions/report';
 import { generateText, Output } from 'ai';
-import {
-  google,
-  GoogleGenerativeAIProviderMetadata,
-  GoogleLanguageModelOptions,
-} from '@ai-sdk/google';
+import { createOpenRouter, OpenRouterProviderOptions } from '@openrouter/ai-sdk-provider';
 import { REPORT_SYSTEM_PROMPT } from '@/lib/prompts';
 import { reportDataSchema } from '@/lib/schemas/report';
-import { ReportStatus } from '@/generated/prisma/enums';
 
 export const maxDuration = 30; // Set to 30 seconds
 // ---------------------------------------------------------------------------
@@ -19,6 +14,11 @@ export const maxDuration = 30; // Set to 30 seconds
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const openrouter = createOpenRouter({
+      apiKey: process.env.OPENROUTER_API_KEY,
+      appName: 'tcc-uerj',
+    });
+
     const { id } = await params;
     console.log(`report/[id]/route.ts -> ID recebido: ${id}`);
 
@@ -35,37 +35,34 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     if (!report?.reportData) {
       await setReportStatusAction(id, 'generating');
       const { text, output, sources, providerMetadata } = await generateText({
-        model: google('gemini-3.1-flash-lite'),
+        model: openrouter.chat('google/gemini-3.1-flash-lite'),
         prompt: `
         artist: '${report.artist}',
         trackTitle: '${report.trackTitle}',
         targetLanguage: '${report.targetLanguage}',
         artifactData: ${JSON.stringify(report.artifactData)},`,
         tools: {
-          google_search: google.tools.googleSearch({}),
-          url_context: google.tools.urlContext({}),
+          web_search: openrouter.tools.webSearch({ needsApproval: false }),
         },
         system: REPORT_SYSTEM_PROMPT,
         output: Output.object({ schema: reportDataSchema }),
         providerOptions: {
-          google: {
-            thinkingConfig: {
-              thinkingLevel: 'medium',
-              includeThoughts: true,
-            },
-          } satisfies GoogleLanguageModelOptions,
-        },
+          reasoning: {
+            enabled: true,
+            effort: 'medium',
+          },
+        } satisfies OpenRouterProviderOptions,
       });
 
       // console.log();
 
       // access the grounding metadata. Casting to the provider metadata type
       // is optional but provides autocomplete and type safety.
-      const metadata = providerMetadata?.google as GoogleGenerativeAIProviderMetadata | undefined;
-      const groundingMetadata = metadata?.groundingMetadata;
-      const safetyRatings = metadata?.safetyRatings;
+      // const metadata = providerMetadata?.google as GoogleGenerativeAIProviderMetadata | undefined;
+      // const groundingMetadata = metadata?.groundingMetadata;
+      // const safetyRatings = metadata?.safetyRatings;
 
-      console.log(JSON.stringify({ text, sources, groundingMetadata, safetyRatings }));
+      console.log(JSON.stringify({ text, sources}));
       // console.log(JSON.stringify(response.messages));
 
       // Save the generated data and update status

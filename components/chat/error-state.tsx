@@ -10,11 +10,11 @@ export function ErrorState({ message }: { message?: string }) {
           {message || 'Report data is incomplete or missing.'}
         </p>
         <Link
-          href="/index"
+          href="/"
           className="mt-8 inline-flex items-center gap-2 hover:underline hover:text-alert transition-colors"
         >
           <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
-          RETURN TO INDEX
+          RETURN TO HOMEPAGE
         </Link>
       </div>
     </div>

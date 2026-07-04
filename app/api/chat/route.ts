@@ -1,5 +1,5 @@
 import { streamText, UIMessage, convertToModelMessages } from 'ai';
-import { google } from '@ai-sdk/google';
+import { createOpenRouter, OpenRouterProviderOptions } from '@openrouter/ai-sdk-provider';
 import { getReportAction } from '@/app/actions/report';
 import { CHAT_SYSTEM_PROMPT } from '@/lib/prompts';
 
@@ -14,6 +14,11 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
+    const openrouter = createOpenRouter({
+      apiKey: process.env.OPENROUTER_API_KEY,
+      appName: 'tcc-uerj',
+    });
+
     const { messages, reportId }: { messages: UIMessage[]; reportId?: string } = await req.json();
 
     // Build the system prompt — optionally enriched with report context
@@ -41,13 +46,18 @@ export async function POST(req: Request) {
     }
 
     const result = streamText({
-      model: google('gemini-3.1-flash-lite'),
+      model: openrouter.chat('google/gemini-3.1-flash-lite'),
       messages: await convertToModelMessages(messages || []),
       tools: {
-        google_search: google.tools.googleSearch({}),
-        url_context: google.tools.urlContext({}),
+        web_search: openrouter.tools.webSearch({ needsApproval: false }),
       },
       system: systemPrompt,
+      providerOptions: {
+        reasoning: {
+          enabled: true,
+          effort: 'medium',
+        },
+      } satisfies OpenRouterProviderOptions,
     });
 
     return result.toUIMessageStreamResponse({ sendReasoning: true });

@@ -103,11 +103,17 @@ export async function setReportStatusAction(
  * Retrieves all report records.
  */
 export async function getAllReportsAction(): Promise<ReportRecord[]> {
-  const reports = await prisma.report.findMany({
-    orderBy: { createdAt: 'desc' },
-  });
+  try {
+    const reports = await prisma.report.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+    });
 
-  return reports.map((r) => reportRecordSchema.parse(r));
+    return reports.map((r) => reportRecordSchema.parse(r));
+  } catch (err) {
+    console.error('Error getting all reports:', err);
+    return [];
+  }
 }
 
 /**

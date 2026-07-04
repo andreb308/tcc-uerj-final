@@ -14,7 +14,7 @@ import { createReportAction } from '@/app/actions/report';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Select,
   SelectContent,
@@ -284,12 +284,19 @@ export function IntakeForm() {
 
         {/* Action Row & Artifact Data Area */}
         {artifactData ? (
-          <Textarea
-            id="artifact-data"
-            value={artifactData}
-            readOnly
-            className="min-h-64 flex-1 resize-none border-0 bg-background p-4 font-mono text-sm focus-visible:ring-0"
-          />
+          <ScrollArea className="relative h-[300px] w-full border-0 bg-background p-4 overflow-hidden">
+            <pre className="whitespace-pre-wrap font-mono text-sm leading-relaxed text-foreground select-text">
+              {artifactData}
+            </pre>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setValue('artifactData', '')}
+              className="absolute bottom-2 right-2 hover:bg-destructive hover:text-secondary text-xs font-bold bg-destructive/20 text-foreground font-mono uppercase hover:underline cursor-pointer"
+            >
+              [ RESET ]
+            </Button>
+          </ScrollArea>
         ) : (
           <div className="flex min-h-64 flex-1 flex-col items-center justify-center bg-background p-6">
             {selectedSong ? (

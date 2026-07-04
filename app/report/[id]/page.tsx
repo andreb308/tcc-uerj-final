@@ -12,6 +12,7 @@ import { useParams } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 
 import type { ReportRecord } from '@/lib/schemas/report';
+import { Modal, ModalBody, ModalContent, ModalTrigger } from '@/components/ui/animated-modal';
 
 function Skeleton({ className }: { className?: string }) {
   return <div className={`animate-pulse bg-gray-400 rounded-md ${className}`} />;
@@ -155,7 +156,7 @@ export default function ReportPage() {
             href="/index"
             className="mt-8 inline-block hover:underline hover:text-alert transition-colors"
           >
-            <ArrowLeftIcon className="inline mr-2" aria-hidden="true" /> RETURN TO INDEX
+            <ArrowLeftIcon className="inline mr-2" aria-hidden="true" /> RETURN TO HOMEPAGE
           </Link>
         </div>
       </main>
@@ -215,41 +216,64 @@ export default function ReportPage() {
                 </span>
               </div>
             </div>
-            <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-              <h1 className="font-display text-5xl md:text-7xl font-bold uppercase leading-[0.9] tracking-tighter">
-                {report.trackTitle} // <br />
-                {report.artist}
-              </h1>
+            <div className="flex flex-col md:flex-row items-center gap-6 mb-4">
+              <Modal>
+                <ModalTrigger className="p-1 border border-ink rounded-none bg-white text-left block overflow-visible cursor-pointer transition-all duration-150 hover:shadow-[4px_4px_0px_0px_black] shrink-0">
+                  <img
+                    alt="Album Cover"
+                    className="size-32 md:size-48 object-cover pointer-events-none"
+                    src="https://placehold.co/600x600?text=Album+Cover"
+                  />
+                </ModalTrigger>
+                <ModalBody className="bg-white border-2 border-ink p-2 rounded-none shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] flex flex-col justify-center items-center">
+                  <ModalContent className="p-2 flex items-center justify-center w-full h-full grow overflow-hidden">
+                    <img
+                      alt="Album Cover Fullscreen"
+                      className="max-w-full max-h-full object-contain border border-ink"
+                      src="https://placehold.co/1024x1024?text=Album+Cover"
+                    />
+                  </ModalContent>
+                </ModalBody>
+              </Modal>
+              <div className="flex-grow">
+                <h1 className="font-display text-5xl md:text-7xl font-bold uppercase leading-[0.9] tracking-tighter">
+                  {report.trackTitle} // <br />
+                  {report.artist}
+                </h1>
+              </div>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-y-4 pt-4 border-t border-ink/20">
+              <div className="flex flex-wrap gap-y-2 gap-x-8 font-mono text-xs md:text-sm">
+                <div>
+                  <span className="text-muted-foreground">ALBUM:</span> {reportData.metadata.album}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">GENRE:</span> {reportData.metadata.genre}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">YEAR:</span> {reportData.metadata.year}
+                </div>
+                <div>
+                  <span className="text-muted-foreground">KEY:</span>{' '}
+                  {reportData.metadata.musicalKey}
+                </div>
+              </div>
               <Link
                 href={`/chat/${id}`}
-                className="print:hidden group inline-flex shrink-0 items-center gap-3 border-2 border-foreground bg-primary px-8 py-5 font-display text-base font-bold uppercase tracking-[2.5px] text-primary-foreground transition-all duration-150 hover:bg-background hover:text-foreground hover:shadow-[4px_4px_0px_0px_black]"
+                className="print:hidden group inline-flex shrink-0 items-center gap-3 border-2 border-foreground bg-primary px-6 py-3 font-display text-xs font-bold uppercase tracking-[2px] text-primary-foreground transition-all duration-150 hover:bg-background hover:text-foreground hover:shadow-[4px_4px_0px_0px_black]"
               >
                 <ChatCircleDotsIcon
-                  className="size-6 transition-transform duration-150 group-hover:scale-110"
+                  className="size-4 transition-transform duration-150 group-hover:scale-110"
                   weight="bold"
                   aria-hidden="true"
                 />
                 {report.chatHistory ? 'Continue' : 'Start'} Conversation
                 <ArrowRightIcon
-                  className="size-5 transition-transform duration-150 group-hover:translate-x-1"
+                  className="size-4 transition-transform duration-150 group-hover:translate-x-1"
                   weight="bold"
                   aria-hidden="true"
                 />
               </Link>
-            </div>
-            <div className="flex flex-wrap gap-y-2 gap-x-8 font-mono text-xs md:text-sm pt-2">
-              <div>
-                <span className="text-muted-foreground">ALBUM:</span> {reportData.metadata.album}
-              </div>
-              <div>
-                <span className="text-muted-foreground">GENRE:</span> {reportData.metadata.genre}
-              </div>
-              <div>
-                <span className="text-muted-foreground">YEAR:</span> {reportData.metadata.year}
-              </div>
-              <div>
-                <span className="text-muted-foreground">KEY:</span> {reportData.metadata.musicalKey}
-              </div>
             </div>
           </div>
         </div>
@@ -465,11 +489,11 @@ export default function ReportPage() {
 
       <div className="mb-12 text-center print:hidden">
         <Link
-          href="/index"
-          className="inline-flex items-center gap-2 text-sm font-mono hover:underline hover:text-alert transition-colors"
+          href="/"
+          className="mt-8 bg-primary text-primary-foreground px-4 py-2 inline-flex items-center gap-2 text-sm font-mono hover:underline hover:text-alert transition-colors"
         >
           <ArrowLeftIcon className="h-4 w-4" aria-hidden="true" />
-          RETURN TO INDEX
+          RETURN TO HOMEPAGE
         </Link>
       </div>
     </main>
