@@ -134,3 +134,48 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Clerk Variable overrides with higher specificity and proximity */
+:root,
+body,
+.cl-rootBox {
+  --clerk-color-primary: #171717;
+  --clerk-color-primary-foreground: #fafafa;
+  --clerk-color-danger: #e7000b;
+  --clerk-color-success: #22c543;
+  --clerk-color-warning: #f36b16;
+  --clerk-color-neutral: #0a0a0a;
+  --clerk-color-foreground: #0a0a0a;
+  --clerk-color-background: var(--color-paper);
+  --clerk-color-input: #e5e5e5;
+  --clerk-color-input-foreground: #0a0a0a;
+  --clerk-color-ring: color-mix(in srgb, #a1a1a1 50%, transparent);
+  --clerk-color-shimmer: #ffffff;
+  --clerk-color-modal-backdrop: #000000;
+  --clerk-border-radius: 0rem;
+  --clerk-spacing: 1rem;
+  --clerk-color-muted: #f5f5f5;
+  --clerk-color-muted-foreground: #737373;
+}
+
+.dark,
+.dark body,
+.dark .cl-rootBox {
+  --clerk-color-primary: #f2f0eb;
+  --clerk-color-primary-foreground: #1c100d;
+  --clerk-color-danger: #ff6467;
+  --clerk-color-success: #22c543;
+  --clerk-color-warning: #f36b16;
+  --clerk-color-neutral: #f2f0eb;
+  --clerk-color-foreground: #f2f0eb;
+  --clerk-color-background: #1c100d;
+  --clerk-color-input: #2d1e1b;
+  --clerk-color-input-foreground: #f2f0eb;
+  --clerk-color-ring: color-mix(in srgb, #a1a1a1 50%, transparent);
+  --clerk-color-shimmer: #ffffff;
+  --clerk-color-modal-backdrop: rgba(0, 0, 0, 0.65);
+  --clerk-border-radius: 0rem;
+  --clerk-spacing: 1rem;
+  --clerk-color-muted: #2d1e1b;
+  --clerk-color-muted-foreground: #a1a1a1;
+}

@@ -103,6 +103,7 @@ export type IntakeFormData = z.infer<typeof intakeFormSchema>;
 
 export const reportRecordSchema = z.object({
   id: z.string(),
+  userId: z.string(),
   status: z.enum(['pending', 'generating', 'complete', 'error']),
   artist: z.string(),
   trackTitle: z.string(),

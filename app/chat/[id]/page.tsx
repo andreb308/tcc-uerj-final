@@ -1,17 +1,16 @@
 'use client';
 
 import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { useChat } from '@ai-sdk/react';
 import type { UIMessage } from 'ai';
 import { useCallback, useEffect, useState } from 'react';
+import { useAuth } from '@clerk/nextjs';
 
 import type { ReportRecord } from '@/lib/schemas/report';
-import { saveChatHistoryAction } from '@/app/actions/report';
+import { saveChatHistoryAction, getChatSessionAction } from '@/app/actions/report';
 
-import { LoadingState } from '@/components/chat/loading-state';
-import { ErrorState } from '@/components/chat/error-state';
-import { EvidencePane, padLineNumber } from '@/components/chat/evidence-pane';
+import { EvidencePane } from '@/components/chat/evidence-pane';
 import { InterrogationPane } from '@/components/chat/interrogation-pane';
 
 // ---------------------------------------------------------------------------
@@ -20,6 +19,7 @@ import { InterrogationPane } from '@/components/chat/interrogation-pane';
 
 export default function ChatPage() {
   const { id } = useParams<{ id: string }>();
+  const { isLoaded, userId: clientUserId } = useAuth();
   const [activeLine, setActiveLine] = useState<number | null>(null);
   const [sessionStartTime] = useState(() =>
     new Date().toLocaleTimeString('en-US', {
@@ -31,25 +31,33 @@ export default function ChatPage() {
     })
   );
 
-  // Fetch report data
-  const {
-    data: report,
-    isLoading: reportLoading,
-    error: reportError,
-  } = useQuery<ReportRecord>({
+  // Fetch report data (secure chat session)
+  const { data: report } = useSuspenseQuery<ReportRecord>({
     queryKey: ['report', id],
     queryFn: async () => {
-      const res = await fetch(`/api/report/${id}`);
-      if (!res.ok) throw new Error('Failed to fetch report');
-      return res.json();
+      // If client auth is loaded and we have no user, throw instant error
+      if (isLoaded && !clientUserId) {
+        throw new Error(
+          'Unauthorized: This record does not belong to your active session credentials or the record is missing.'
+        );
+      }
+
+      const data = await getChatSessionAction(id);
+      if (!data) {
+        throw new Error('Report not found');
+      }
+      return data;
     },
-    enabled: !!id,
     refetchOnWindowFocus: false,
   });
 
+  if (!report || !report.reportData) {
+    throw new Error('Report analysis data is incomplete or missing.');
+  }
+
   // Parse initial messages from chat history
   const initialMessages: UIMessage[] =
-    report?.chatHistory && Array.isArray(report.chatHistory) && report.chatHistory.length > 0
+    report.chatHistory && Array.isArray(report.chatHistory) && report.chatHistory.length > 0
       ? (report.chatHistory as UIMessage[])
       : [
           {
@@ -96,17 +104,6 @@ export default function ChatPage() {
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [id, messages]);
 
-  // Periodic auto-save every 30s when there are messages
-  // useEffect(() => {
-  //   if (messages.length === 0) return;
-
-  //   const interval = setInterval(() => {
-  //     saveChatHistoryAction(id, messages);
-  //   }, 30_000);
-
-  //   return () => clearInterval(interval);
-  // }, [id, messages]);
-
   // Handle line click: set active + insert into input
   const handleLineClick = useCallback(
     (lineIndex: number, lineText: string) => {
@@ -125,11 +122,6 @@ export default function ChatPage() {
     },
     [setInput]
   );
-
-  if (reportLoading) return <LoadingState />;
-  if (reportError || !report || !report.reportData) {
-    return <ErrorState message={reportError?.message} />;
-  }
 
   return (
     <div className="flex grow overflow-hidden">

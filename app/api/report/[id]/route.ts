@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getReportAction, updateReportAction, setReportStatusAction } from '@/app/actions/report';
+import { getPublicReportAction } from '@/app/actions/report';
 import { generateText, Output } from 'ai';
 import { createOpenRouter, OpenRouterProviderOptions } from '@openrouter/ai-sdk-provider';
 import { REPORT_SYSTEM_PROMPT } from '@/lib/prompts';
 import { reportDataSchema } from '@/lib/schemas/report';
+import { prisma } from '@/lib/prisma';
 
 export const maxDuration = 30; // Set to 30 seconds
 // ---------------------------------------------------------------------------
@@ -26,14 +27,18 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: 'Missing report ID' }, { status: 400 });
     }
 
-    const report = await getReportAction(id);
+    const report = await getPublicReportAction(id);
 
     if (!report) {
       return NextResponse.json({ error: 'Report not found' }, { status: 404 });
     }
 
     if (!report?.reportData) {
-      await setReportStatusAction(id, 'generating');
+      await prisma.report.update({
+        where: { id },
+        data: { status: 'generating' },
+      });
+
       const { text, output, sources, providerMetadata } = await generateText({
         model: openrouter.chat('google/gemini-3.1-flash-lite'),
         prompt: `
@@ -55,23 +60,19 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         } satisfies OpenRouterProviderOptions,
       });
 
-      // console.log();
-
-      // access the grounding metadata. Casting to the provider metadata type
-      // is optional but provides autocomplete and type safety.
-      // const metadata = providerMetadata?.google as GoogleGenerativeAIProviderMetadata | undefined;
-      // const groundingMetadata = metadata?.groundingMetadata;
-      // const safetyRatings = metadata?.safetyRatings;
-
       console.log(JSON.stringify({ text, sources }));
-      // console.log(JSON.stringify(response.messages));
 
       // Save the generated data and update status
-      await updateReportAction(id, { reportData: output });
-      await setReportStatusAction(id, 'complete');
+      await prisma.report.update({
+        where: { id },
+        data: {
+          reportData: output as any,
+          status: 'complete',
+        },
+      });
 
       // Return the updated report record
-      const updatedReport = await getReportAction(id);
+      const updatedReport = await getPublicReportAction(id);
       return NextResponse.json(updatedReport);
     }
 

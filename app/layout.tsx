@@ -4,6 +4,7 @@ import './globals.css';
 
 import { Toaster } from '@/components/ui/sonner';
 import { Providers } from '@/components/query-provider';
+import { ClerkProvider, SignInButton, SignUpButton, Show, UserButton } from '@clerk/nextjs';
 
 const ibmPlexMono = IBM_Plex_Mono({
   subsets: ['latin'],
@@ -30,11 +31,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${ibmPlexMono.variable} ${spaceGrotesk.variable} font-mono antialiased`}>
-        <Providers>
-          {children}
-          {/* Sonner Toaster for notifications */}
-          <Toaster position="bottom-right" richColors closeButton />
-        </Providers>
+        <ClerkProvider>
+          <Providers>
+            {children}
+            {/* Sonner Toaster for notifications */}
+            <Toaster position="bottom-right" richColors closeButton />
+          </Providers>
+        </ClerkProvider>
       </body>
     </html>
   );

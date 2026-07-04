@@ -3,6 +3,7 @@
 import { TerminalIcon } from '@phosphor-icons/react';
 import Link from 'next/link';
 import { useUtcTime } from '@/hooks/use-utc-time';
+import { SignInButton, Show, UserButton } from '@clerk/nextjs';
 
 export default function ChatLayout({
   children,
@@ -31,6 +32,17 @@ export default function ChatLayout({
               {utcString} UTC
             </span>
           </div>
+
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button className="cursor-pointer h-8 border border-ink bg-paper px-3 text-xs font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors duration-0">
+                [ SIGN_IN ]
+              </button>
+            </SignInButton>
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
         </div>
       </header>
       {children}

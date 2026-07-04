@@ -2,6 +2,7 @@
 
 import { PrinterIcon, TerminalIcon, XIcon } from '@phosphor-icons/react';
 import Link from 'next/link';
+import { SignInButton, Show, UserButton } from '@clerk/nextjs';
 
 export default function ReportLayout({
   children,
@@ -33,6 +34,17 @@ export default function ReportLayout({
           >
             <XIcon className="h-4 w-4" aria-hidden="true" />
           </Link>
+
+          <Show when="signed-out">
+            <SignInButton mode="modal">
+              <button className="cursor-pointer h-8 border border-ink bg-paper px-3 text-xs font-bold uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors duration-0">
+                [ SIGN_IN ]
+              </button>
+            </SignInButton>
+          </Show>
+          <Show when="signed-in">
+            <UserButton />
+          </Show>
         </div>
       </header>
       {children}
