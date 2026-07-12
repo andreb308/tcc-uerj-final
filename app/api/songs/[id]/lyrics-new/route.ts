@@ -563,16 +563,13 @@ function fromLetras(title: string, artistName: string, browser?: Browser, signal
       return cleanLyrics(lyrics.trim());
     } catch (searchErr: any) {
       try {
-        const fs = await import('fs/promises');
-        const path = await import('path');
-        const errorHtml = await page.content().catch(() => 'Failed to capture page content');
-        
         const isVercel = !!process.env.VERCEL;
         if (isVercel) {
-          const filePath = path.join('/tmp', 'letras-search-error.html');
-          await fs.writeFile(filePath, errorHtml, 'utf-8');
-          console.error(`[lyricSearch] Letras search error HTML dumped to temp storage: ${filePath}`);
+          console.error(`[lyricSearch] Letras search failed in production:`, searchErr.message || searchErr);
         } else {
+          const fs = await import('fs/promises');
+          const path = await import('path');
+          const errorHtml = await page.content().catch(() => 'Failed to capture page content');
           const scratchDir = path.join(process.cwd(), 'scratch');
           await fs.mkdir(scratchDir, { recursive: true });
           const filePath = path.join(scratchDir, 'letras-search-error.html');
@@ -580,7 +577,7 @@ function fromLetras(title: string, artistName: string, browser?: Browser, signal
           console.error(`[lyricSearch] Letras search error HTML dumped to: ${filePath}`);
         }
       } catch (dumpErr) {
-        console.error('[lyricSearch] Failed to dump search page content:', dumpErr);
+        console.error('[lyricSearch] Failed to handle search error:', dumpErr);
       }
       throw searchErr;
     } finally {
