@@ -12,6 +12,7 @@ async function testDatabase() {
     console.log("\n📝 Creating a test report...");
     const newReport = await prisma.report.create({
       data: {
+        userId: "test-user-id",
         artist: "Test Artist",
         trackTitle: "Test Track",
         targetLanguage: "en",

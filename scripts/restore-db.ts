@@ -56,6 +56,7 @@ async function main() {
       await prisma.report.create({
         data: {
           id: report.id,
+          userId: report.userId || 'restored-user',
           status: report.status,
           artist: report.artist,
           trackTitle: report.trackTitle,
