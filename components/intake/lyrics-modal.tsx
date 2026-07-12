@@ -47,7 +47,7 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
         artist: artistName,
         title: songTitle,
       });
-      const res = await fetch(`/api/songs/${songId}/lyrics-new?${params.toString()}`);
+      const res = await fetch(`/api/songs/${songId}/lyrics-test?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch lyrics');
       return res.json();
     },
