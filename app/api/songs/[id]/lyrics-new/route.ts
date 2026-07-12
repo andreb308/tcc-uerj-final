@@ -6,7 +6,9 @@ export const maxDuration = 60;
 
 async function launchBrowser(): Promise<Browser> {
   const isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL;
-  console.log(`[lyricSearch] launchBrowser requested. Env: NODE_ENV=${process.env.NODE_ENV}, VERCEL=${process.env.VERCEL}. Target: ${isProd ? 'Production/Serverless' : 'Local/Dev'}`);
+  console.log(
+    `[lyricSearch] launchBrowser requested. Env: NODE_ENV=${process.env.NODE_ENV}, VERCEL=${process.env.VERCEL}. Target: ${isProd ? 'Production/Serverless' : 'Local/Dev'}`
+  );
 
   if (isProd) {
     try {
@@ -225,7 +227,11 @@ function cleanLyrics(text: string): string {
         return false;
       }
       // Unbracketed title/artist headers containing quotes and ending/containing "가사"
-      if (trimmed.includes('가사') && trimmed.includes('"') && (trimmed.endsWith('가사') || trimmed.startsWith(trimmed.split('"')[0]))) {
+      if (
+        trimmed.includes('가사') &&
+        trimmed.includes('"') &&
+        (trimmed.endsWith('가사') || trimmed.startsWith(trimmed.split('"')[0]))
+      ) {
         return false;
       }
       return true;
@@ -317,7 +323,9 @@ async function fetchHtml(
       throw new Error(`Failed to load ${url} (no response)`);
     }
 
-    console.log(`[lyricSearch] fetchHtml: Completed loading URL: ${url} (status: ${response.status()})`);
+    console.log(
+      `[lyricSearch] fetchHtml: Completed loading URL: ${url} (status: ${response.status()})`
+    );
 
     if (!response.ok()) {
       throw new Error(`HTTP ${response.status()} from ${url}`);
@@ -379,7 +387,12 @@ function parseGeniusPage($: cheerio.CheerioAPI): string {
  * Genius - largest lyrics database
  * Tries guessing the URL directly first to save API calls, then falls back to search API
  */
-function fromGenius(title: string, artistName: string, browser?: Browser, signal?: AbortSignal): Promise<string> {
+function fromGenius(
+  title: string,
+  artistName: string,
+  browser?: Browser,
+  signal?: AbortSignal
+): Promise<string> {
   const directUrl = guessGeniusUrl(title, artistName);
   console.log(`[lyricSearch] Trying Genius direct URL: ${directUrl}`);
 
@@ -436,7 +449,12 @@ function fromGenius(title: string, artistName: string, browser?: Browser, signal
  * AZLyrics - good English song coverage
  * Direct URL construction
  */
-function fromAZLyrics(title: string, artistName: string, browser?: Browser, signal?: AbortSignal): Promise<string> {
+function fromAZLyrics(
+  title: string,
+  artistName: string,
+  browser?: Browser,
+  signal?: AbortSignal
+): Promise<string> {
   const artist = stripToAlphaNum(deburr(artistName)).replace(/^the/, '');
   const song = stripToAlphaNum(deburr(title));
   const url = 'https://www.azlyrics.com/lyrics/' + artist + '/' + song + '.html';
@@ -461,82 +479,77 @@ function fromAZLyrics(title: string, artistName: string, browser?: Browser, sign
 /**
  * Letras.mus.br - excellent international coverage
  */
-function fromLetras(title: string, artistName: string, browser?: Browser, signal?: AbortSignal): Promise<string> {
+function fromLetras(
+  title: string,
+  artistName: string,
+  browser?: Browser,
+  signal?: AbortSignal
+): Promise<string> {
   const artist = kebabCase(deburr(artistName.trim()));
   const song = kebabCase(deburr(title.trim()));
   const url = 'https://www.letras.mus.br/' + artist + '/' + song + '/';
   console.log(`[lyricSearch] Trying Letras.mus.br direct URL: ${url}`);
-  
-  return fetchHtml(url, {
-    rejectRedirects: true,
-  }, browser, signal).then(($) => {
-    const el = $('.lyric-original p, .lyric-tra p');
-    if (el.length === 0) throw new Error('Not found');
-    let lyrics = '';
-    el.each((_, p) => {
-      const $p = $(p);
-      $p.find('.romanization').remove();
-      $p.find('br').replaceWith('\n');
-      lyrics += $p.text().trim() + '\n\n';
-    });
-    return cleanLyrics(lyrics.trim());
-  }).catch(async (err) => {
-    if (signal?.aborted) throw err;
-    if (!browser) throw err;
-    
-    console.log(`[lyricSearch] Letras.mus.br direct URL failed, trying search...`);
-    const queryStr = encodeURIComponent(`${artistName} ${title}`);
-    const searchUrl = `https://www.letras.mus.br/?q=${queryStr}#gsc.tab=0&gsc.q=${queryStr}`;
-    console.log(`[lyricSearch] Letras search crawler: requesting URL search: ${searchUrl}`);
-    
-    const page = await browser.newPage();
-    try {
-      await page.setUserAgent(USER_AGENT);
-      console.log(`[lyricSearch] Letras search crawler: Navigating page to searchUrl...`);
-      await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 5000 });
-      console.log(`[lyricSearch] Letras search crawler: Page loaded initial DOM. Waiting for CSE results selector 'a.gs-title'...`);
-      await page.waitForSelector('a.gs-title', { timeout: 4000 });
-      console.log(`[lyricSearch] Letras search crawler: CSE results selector 'a.gs-title' successfully loaded!`);
-      const content = await page.content();
-      const $ = cheerio.load(content);
-      const results = $('a.gs-title');
-      
-      let bestLink: string | null = null;
-      let bestScore = Infinity;
-      
-      // Pass 1: Try to find original lyrics (no translations)
-      results.each((_, el) => {
-        const $el = $(el);
-        const href = $el.attr('href') || $el.attr('data-ctorig');
-        if (!href || !href.includes('letras.mus.br')) return;
-        if (href.endsWith('/traducao.html') || href.endsWith('/significado.html')) return;
-        
-        const text = $el.text();
-        const parts = text.split('-');
-        const resultTitle = parts[0]?.trim() || '';
-        const resultArtist = parts[1]?.trim() || '';
-        
-        if (titleMatches(title, resultTitle)) {
-          const score = levenshtein(artistName.toLowerCase(), resultArtist.toLowerCase());
-          if (score < bestScore) {
-            bestScore = score;
-            bestLink = href;
-          }
-        }
+
+  return fetchHtml(
+    url,
+    {
+      rejectRedirects: true,
+    },
+    browser,
+    signal
+  )
+    .then(($) => {
+      const el = $('.lyric-original p, .lyric-tra p');
+      if (el.length === 0) throw new Error('Not found');
+      let lyrics = '';
+      el.each((_, p) => {
+        const $p = $(p);
+        $p.find('.romanization').remove();
+        $p.find('br').replaceWith('\n');
+        lyrics += $p.text().trim() + '\n\n';
       });
-      
-      // Pass 2: Fallback to translations if no original page found
-      if (!bestLink) {
+      return cleanLyrics(lyrics.trim());
+    })
+    .catch(async (err) => {
+      if (signal?.aborted) throw err;
+      if (!browser) throw err;
+
+      console.log(`[lyricSearch] Letras.mus.br direct URL failed, trying search...`);
+      const queryStr = encodeURIComponent(`${artistName} ${title}`);
+      const searchUrl = `https://www.letras.mus.br/?q=${queryStr}#gsc.tab=0&gsc.q=${queryStr}`;
+      console.log(`[lyricSearch] Letras search crawler: requesting URL search: ${searchUrl}`);
+
+      const page = await browser.newPage();
+      try {
+        await page.setUserAgent(USER_AGENT);
+        console.log(`[lyricSearch] Letras search crawler: Navigating page to searchUrl...`);
+        await page.goto(searchUrl, { waitUntil: 'networkidle0', timeout: 30000 });
+        console.log(
+          `[lyricSearch] Letras search crawler: Page loaded initial DOM. Waiting for CSE results selector 'a.gs-title'...`
+        );
+        await page.waitForSelector('a.gs-title', { timeout: 20000 });
+        console.log(
+          `[lyricSearch] Letras search crawler: CSE results selector 'a.gs-title' successfully loaded!`
+        );
+        const content = await page.content();
+        const $ = cheerio.load(content);
+        const results = $('a.gs-title');
+
+        let bestLink: string | null = null;
+        let bestScore = Infinity;
+
+        // Pass 1: Try to find original lyrics (no translations)
         results.each((_, el) => {
           const $el = $(el);
           const href = $el.attr('href') || $el.attr('data-ctorig');
           if (!href || !href.includes('letras.mus.br')) return;
-          
+          if (href.endsWith('/traducao.html') || href.endsWith('/significado.html')) return;
+
           const text = $el.text();
           const parts = text.split('-');
           const resultTitle = parts[0]?.trim() || '';
           const resultArtist = parts[1]?.trim() || '';
-          
+
           if (titleMatches(title, resultTitle)) {
             const score = levenshtein(artistName.toLowerCase(), resultArtist.toLowerCase());
             if (score < bestScore) {
@@ -545,51 +558,80 @@ function fromLetras(title: string, artistName: string, browser?: Browser, signal
             }
           }
         });
-      }
-      
-      if (!bestLink) throw new Error('No matching result found in Letras search');
-      
-      console.log(`[lyricSearch] Found Letras.mus.br match URL from search: ${bestLink}`);
-      const $lyricsPage = await fetchHtml(bestLink, {}, browser, signal);
-      const el = $lyricsPage('.lyric-original p, .lyric-tra p');
-      if (el.length === 0) throw new Error('Lyrics paragraph not found');
-      let lyrics = '';
-      el.each((_, p) => {
-        const $p = $lyricsPage(p);
-        $p.find('.romanization').remove();
-        $p.find('br').replaceWith('\n');
-        lyrics += $p.text().trim() + '\n\n';
-      });
-      return cleanLyrics(lyrics.trim());
-    } catch (searchErr: any) {
-      try {
-        const isVercel = !!process.env.VERCEL;
-        if (isVercel) {
-          console.error(`[lyricSearch] Letras search failed in production:`, searchErr.message || searchErr);
-        } else {
-          const fs = await import('fs/promises');
-          const path = await import('path');
-          const errorHtml = await page.content().catch(() => 'Failed to capture page content');
-          const scratchDir = path.join(process.cwd(), 'scratch');
-          await fs.mkdir(scratchDir, { recursive: true });
-          const filePath = path.join(scratchDir, 'letras-search-error.html');
-          await fs.writeFile(filePath, errorHtml, 'utf-8');
-          console.error(`[lyricSearch] Letras search error HTML dumped to: ${filePath}`);
+
+        // Pass 2: Fallback to translations if no original page found
+        if (!bestLink) {
+          results.each((_, el) => {
+            const $el = $(el);
+            const href = $el.attr('href') || $el.attr('data-ctorig');
+            if (!href || !href.includes('letras.mus.br')) return;
+
+            const text = $el.text();
+            const parts = text.split('-');
+            const resultTitle = parts[0]?.trim() || '';
+            const resultArtist = parts[1]?.trim() || '';
+
+            if (titleMatches(title, resultTitle)) {
+              const score = levenshtein(artistName.toLowerCase(), resultArtist.toLowerCase());
+              if (score < bestScore) {
+                bestScore = score;
+                bestLink = href;
+              }
+            }
+          });
         }
-      } catch (dumpErr) {
-        console.error('[lyricSearch] Failed to handle search error:', dumpErr);
+
+        if (!bestLink) throw new Error('No matching result found in Letras search');
+
+        console.log(`[lyricSearch] Found Letras.mus.br match URL from search: ${bestLink}`);
+        const $lyricsPage = await fetchHtml(bestLink, {}, browser, signal);
+        const el = $lyricsPage('.lyric-original p, .lyric-tra p');
+        if (el.length === 0) throw new Error('Lyrics paragraph not found');
+        let lyrics = '';
+        el.each((_, p) => {
+          const $p = $lyricsPage(p);
+          $p.find('.romanization').remove();
+          $p.find('br').replaceWith('\n');
+          lyrics += $p.text().trim() + '\n\n';
+        });
+        return cleanLyrics(lyrics.trim());
+      } catch (searchErr: any) {
+        try {
+          // const isVercel = !!process.env.VERCEL;
+          // if (isVercel) {
+          console.error(
+            `[lyricSearch] Letras search failed in production:`,
+            searchErr.message || searchErr
+          );
+          // } else {
+          //   const fs = await import('fs/promises');
+          //   const path = await import('path');
+          //   const errorHtml = await page.content().catch(() => 'Failed to capture page content');
+          //   const scratchDir = path.join(process.cwd(), 'scratch');
+          //   await fs.mkdir(scratchDir, { recursive: true });
+          //   const filePath = path.join(scratchDir, 'letras-search-error.html');
+          //   await fs.writeFile(filePath, errorHtml, 'utf-8');
+          //   console.error(`[lyricSearch] Letras search error HTML dumped to: ${filePath}`);
+          // }
+        } catch (dumpErr) {
+          console.error('[lyricSearch] Failed to handle search error:', dumpErr);
+        }
+        throw searchErr;
+      } finally {
+        await page.close().catch(() => {});
       }
-      throw searchErr;
-    } finally {
-      await page.close().catch(() => {});
-    }
-  });
+    });
 }
 
 /**
  * Lyrics.com - search then scrape
  */
-function fromLyricsCom(title: string, artistName: string, browser?: Browser, signal?: AbortSignal): Promise<string> {
+function fromLyricsCom(
+  title: string,
+  artistName: string,
+  browser?: Browser,
+  signal?: AbortSignal
+): Promise<string> {
   const searchUrl =
     'https://www.lyrics.com/serp.php?st=' +
     encodeURIComponent(title + ' ' + artistName) +
@@ -634,7 +676,12 @@ function fromLyricsCom(title: string, artistName: string, browser?: Browser, sig
 /**
  * Paroles.net - French lyrics site, works well
  */
-function fromParolesNet(title: string, artistName: string, browser?: Browser, signal?: AbortSignal): Promise<string> {
+function fromParolesNet(
+  title: string,
+  artistName: string,
+  browser?: Browser,
+  signal?: AbortSignal
+): Promise<string> {
   const lyricsUrl = (s: string) => kebabCase(deburr(s.trim().toLowerCase()));
   const url = 'https://www.paroles.net/' + lyricsUrl(artistName) + '/paroles-' + lyricsUrl(title);
   console.log(`[lyricSearch] Trying Paroles.net direct URL: ${url}`);
@@ -655,7 +702,7 @@ function fromOvh(title: string, artistName: string, signal?: AbortSignal): Promi
   const url = `https://api.lyrics.ovh/v1/${encodeURIComponent(artistName)}/${encodeURIComponent(title)}`;
   console.log(`[lyricSearch] Trying lyrics.ovh API URL: ${url}`);
   return fetch(url, {
-    headers: { 'User-Agent': USER_AGENT, 'Accept': 'application/json' },
+    headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
     cache: 'no-store',
     signal: getAbortSignal(FETCH_TIMEOUT, signal),
   })
@@ -672,7 +719,12 @@ function fromOvh(title: string, artistName: string, signal?: AbortSignal): Promi
 /**
  * LyricsMania - multiple URL patterns
  */
-function fromLyricsMania(title: string, artistName: string, browser?: Browser, signal?: AbortSignal): Promise<string> {
+function fromLyricsMania(
+  title: string,
+  artistName: string,
+  browser?: Browser,
+  signal?: AbortSignal
+): Promise<string> {
   const maniaUrl = (s: string) => snakeCase(deburr(s.trim().toLowerCase()));
   const urls = [
     'https://www.lyricsmania.com/' + maniaUrl(title) + '_lyrics_' + maniaUrl(artistName) + '.html',
@@ -691,7 +743,7 @@ function fromLyricsMania(title: string, artistName: string, browser?: Browser, s
 
 // ── Main ─────────────────────────────────────────────────────
 
-const GENIUS_ADVANTAGE_MS = 2000; // Milliseconds advantage given to Genius
+const GENIUS_ADVANTAGE_MS = 0; // Milliseconds advantage given to Genius
 
 function runDelayed<T>(
   ms: number,
@@ -747,7 +799,11 @@ function runDelayed<T>(
  * @param {string} artistName
  * @returns {Promise<string>}
  */
-export async function findLyrics(title: string, artistName: string, browserInput?: Browser): Promise<string> {
+export async function findLyrics(
+  title: string,
+  artistName: string,
+  browserInput?: Browser
+): Promise<string> {
   const key = artistName.toLowerCase() + '\n' + title.toLowerCase();
   const cached = cacheGet(key);
   if (cached) return Promise.resolve(cached);
@@ -773,32 +829,32 @@ export async function findLyrics(title: string, artistName: string, browserInput
     };
 
     const promises = [
-      // Genius starts immediately
-      fromGenius(title, artistName, browser, signal)
-        .then((l) => ({ source: 'Genius', lyrics: l }))
-        .catch((err) => logError('Genius', err)),
+      //   // Genius starts immediately
+      //   fromGenius(title, artistName, browser, signal)
+      //     .then((l) => ({ source: 'Genius', lyrics: l }))
+      //     .catch((err) => logError('Genius', err)),
 
-      // lyrics.ovh also starts immediately alongside Genius
-      fromOvh(title, artistName, signal)
-        .then((l) => ({ source: 'lyrics.ovh', lyrics: l }))
-        .catch((err) => logError('lyrics.ovh', err)),
+      //   // lyrics.ovh also starts immediately alongside Genius
+      //   fromOvh(title, artistName, signal)
+      //     .then((l) => ({ source: 'lyrics.ovh', lyrics: l }))
+      //     .catch((err) => logError('lyrics.ovh', err)),
 
-      // Other sources start with a delay (Genius advantage)
-      runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
-        fromAZLyrics(title, artistName, browser, signal).then((l) => ({ source: 'AZLyrics', lyrics: l }))
-      ).catch((err) => logError('AZLyrics', err)),
-      runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
-        fromParolesNet(title, artistName, browser, signal).then((l) => ({ source: 'Paroles.net', lyrics: l }))
-      ).catch((err) => logError('Paroles.net', err)),
-      runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
-        fromLyricsMania(title, artistName, browser, signal).then((l) => ({ source: 'LyricsMania', lyrics: l }))
-      ).catch((err) => logError('LyricsMania', err)),
+      //   // Other sources start with a delay (Genius advantage)
+      //   runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
+      //     fromAZLyrics(title, artistName, browser, signal).then((l) => ({ source: 'AZLyrics', lyrics: l }))
+      //   ).catch((err) => logError('AZLyrics', err)),
+      //   runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
+      //     fromParolesNet(title, artistName, browser, signal).then((l) => ({ source: 'Paroles.net', lyrics: l }))
+      //   ).catch((err) => logError('Paroles.net', err)),
+      //   runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
+      //     fromLyricsMania(title, artistName, browser, signal).then((l) => ({ source: 'LyricsMania', lyrics: l }))
+      //   ).catch((err) => logError('LyricsMania', err)),
       fromLetras(title, artistName, browser, signal)
         .then((l) => ({ source: 'Letras', lyrics: l }))
         .catch((err) => logError('Letras', err)),
-      runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
-        fromLyricsCom(title, artistName, browser, signal).then((l) => ({ source: 'Lyrics.com', lyrics: l }))
-      ).catch((err) => logError('Lyrics.com', err)),
+      //   runDelayed(GENIUS_ADVANTAGE_MS, signal, () =>
+      //     fromLyricsCom(title, artistName, browser, signal).then((l) => ({ source: 'Lyrics.com', lyrics: l }))
+      //   ).catch((err) => logError('Lyrics.com', err)),
     ];
 
     // If title has parentheses/brackets, also try without them (run delayed)
@@ -855,7 +911,7 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   if (!songId || isNaN(songId)) {
     return NextResponse.json({ error: 'Invalid song ID' }, { status: 400 });
   }
-  
+
   const artist = request.nextUrl.searchParams.get('artist');
   const title = request.nextUrl.searchParams.get('title');
 
@@ -893,10 +949,13 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
     });
   } catch (error: any) {
     console.error('Failed to fetch lyrics:', error);
-    return NextResponse.json({
-      error: 'Failed to fetch lyrics',
-      message: error?.message || String(error),
-      stack: error?.stack,
-    }, { status: 500 });
+    return NextResponse.json(
+      {
+        error: 'Failed to fetch lyrics',
+        message: error?.message || String(error),
+        stack: error?.stack,
+      },
+      { status: 500 }
+    );
   }
 }
