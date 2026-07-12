@@ -137,7 +137,7 @@ export async function setReportStatusAction(
 /**
  * Retrieves all report records.
  */
-export async function getAllReportsAction(): Promise<ReportRecord[]> {
+export async function getAllReportsAction(take?: number): Promise<ReportRecord[]> {
   const { userId } = await auth();
   if (!userId) return [];
 
@@ -145,7 +145,7 @@ export async function getAllReportsAction(): Promise<ReportRecord[]> {
     const reports = await prisma.report.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },
-      take: 10,
+      take: take ?? 10,
     });
 
     return reports.map((r) => reportRecordSchema.parse(r));
