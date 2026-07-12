@@ -53,6 +53,12 @@ export async function POST(req: Request) {
         web_search: openrouter.tools.webSearch({ needsApproval: false }),
       },
       system: systemPrompt,
+      experimental_onToolCallStart(event) {
+        console.log('Tool starting:', event.toolCall.toolName);
+      },
+      experimental_onToolCallFinish(event) {
+        console.log('Tool finished:', event.toolCall.toolName);
+      },
       providerOptions: {
         reasoning: {
           enabled: true,

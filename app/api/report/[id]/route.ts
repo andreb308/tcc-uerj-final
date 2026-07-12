@@ -52,6 +52,12 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
         },
         system: REPORT_SYSTEM_PROMPT,
         output: Output.object({ schema: reportDataSchema }),
+        experimental_onToolCallStart(event) {
+          console.log('Tool starting:', event.toolCall.toolName);
+        },
+        experimental_onToolCallFinish(event) {
+          console.log('Tool finished:', event.toolCall.toolName);
+        },
         providerOptions: {
           reasoning: {
             enabled: true,
