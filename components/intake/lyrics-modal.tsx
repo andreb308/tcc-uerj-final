@@ -47,7 +47,7 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
         artist: artistName,
         title: songTitle,
       });
-      const res = await fetch(`/api/songs/${songId}/lyrics-test?${params.toString()}`);
+      const res = await fetch(`/api/songs/${songId}/lyrics?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch lyrics');
       return res.json();
     },
@@ -71,7 +71,7 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
       const indices = Array.from(newSelected);
       const min = Math.min(...indices);
       const max = Math.max(...indices);
-      
+
       newSelected = new Set();
       for (let i = min; i <= max; i++) {
         if (lyricsData?.lyrics[i]?.text) {
@@ -85,10 +85,10 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
 
   const handleConfirm = () => {
     if (!lyricsData) return;
-    
+
     let selected: LyricLine[];
     if (selectAll) {
-      selected = lyricsData.lyrics.filter(l => l.text);
+      selected = lyricsData.lyrics.filter((l) => l.text);
     } else {
       selected = Array.from(selectedLines)
         .sort((a, b) => a - b) // Ensure chronological order
@@ -132,67 +132,69 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
         ) : (
           <ScrollArea className="flex-1 min-h-0 w-full">
             <div className="p-4 flex flex-col gap-1">
-            {lyricsData.lyrics.map((line, index) => {
-              const isSelected = selectedLines.has(index);
+              {lyricsData.lyrics.map((line, index) => {
+                const isSelected = selectedLines.has(index);
 
-              if (line.annotation && !line.text) {
+                if (line.annotation && !line.text) {
+                  return (
+                    <div key={`ann-${index}`} className="mt-6 mb-2 first:mt-0 px-2">
+                      <span className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        {line.annotation}
+                      </span>
+                    </div>
+                  );
+                }
+
                 return (
-                  <div key={`ann-${index}`} className="mt-6 mb-2 first:mt-0 px-2">
-                    <span className="font-mono text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      {line.annotation}
-                    </span>
-                  </div>
-                );
-              }
-
-              return (
-                <button
-                  type="button"
-                  key={`${line.number}-${index}`}
-                  onClick={() => toggleLine(index)}
-                  className={cn(
-                    'group relative flex w-full items-start gap-3 rounded-sm p-3 text-left transition-colors border border-transparent',
-                    isSelected && !selectAll
-                      ? 'bg-destructive/10 border-destructive/20 shadow-[0_0_0_1px_rgba(242,59,13,0.1)]'
-                      : 'hover:bg-muted/50 hover:border-border',
-                    selectAll && 'opacity-50 pointer-events-none'
-                  )}
-                >
-                  <div className="flex h-6 items-center shrink-0 pointer-events-none">
-                    <Checkbox
-                      checked={selectAll ? true : isSelected}
-                      className={cn(
-                        'data-[state=checked]:bg-destructive data-[state=checked]:border-destructive',
-                        !isSelected && !selectAll && 'opacity-0 group-hover:opacity-100 transition-opacity'
-                      )}
-                      aria-label={`Select line ${line.number}`}
-                    />
-                  </div>
-
-                  <span className="flex h-6 items-center shrink-0 font-mono text-[10px] text-foreground/40 w-6">
-                    {line.number}
-                  </span>
-
-                  <div className="flex flex-col gap-1 min-w-0 flex-1">
-                    {line.annotation && (
-                      <div className="border-l-2 border-destructive pl-2.5">
-                        <span className="font-mono text-xs italic text-foreground/60 block truncate">
-                          {line.annotation}
-                        </span>
-                      </div>
+                  <button
+                    type="button"
+                    key={`${line.number}-${index}`}
+                    onClick={() => toggleLine(index)}
+                    className={cn(
+                      'group relative flex w-full items-start gap-3 rounded-sm p-3 text-left transition-colors border border-transparent',
+                      isSelected && !selectAll
+                        ? 'bg-destructive/10 border-destructive/20 shadow-[0_0_0_1px_rgba(242,59,13,0.1)]'
+                        : 'hover:bg-muted/50 hover:border-border',
+                      selectAll && 'opacity-50 pointer-events-none'
                     )}
-                    <span
-                      className={cn(
-                        'font-display text-lg font-medium transition-colors',
-                        isSelected || selectAll ? 'text-destructive' : 'text-foreground'
-                      )}
-                    >
-                      {line.text}
+                  >
+                    <div className="flex h-6 items-center shrink-0 pointer-events-none">
+                      <Checkbox
+                        checked={selectAll ? true : isSelected}
+                        className={cn(
+                          'data-[state=checked]:bg-destructive data-[state=checked]:border-destructive',
+                          !isSelected &&
+                            !selectAll &&
+                            'opacity-0 group-hover:opacity-100 transition-opacity'
+                        )}
+                        aria-label={`Select line ${line.number}`}
+                      />
+                    </div>
+
+                    <span className="flex h-6 items-center shrink-0 font-mono text-[10px] text-foreground/40 w-6">
+                      {line.number}
                     </span>
-                  </div>
-                </button>
-              );
-            })}
+
+                    <div className="flex flex-col gap-1 min-w-0 flex-1">
+                      {line.annotation && (
+                        <div className="border-l-2 border-destructive pl-2.5">
+                          <span className="font-mono text-xs italic text-foreground/60 block truncate">
+                            {line.annotation}
+                          </span>
+                        </div>
+                      )}
+                      <span
+                        className={cn(
+                          'font-display text-lg font-medium transition-colors',
+                          isSelected || selectAll ? 'text-destructive' : 'text-foreground'
+                        )}
+                      >
+                        {line.text}
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </ScrollArea>
         )}
@@ -201,7 +203,7 @@ function LyricsSelector({ songId, songTitle, artistName, onConfirm }: LyricsModa
       <ModalFooter className="border-t border-border bg-muted/50 px-6 py-4 flex flex-col sm:flex-row items-center justify-between shrink-0 rounded-none w-full relative z-60 gap-4">
         <div className="flex items-center gap-3 w-full sm:w-auto">
           <label className="flex items-center gap-2 cursor-pointer group">
-            <Checkbox 
+            <Checkbox
               checked={selectAll}
               onCheckedChange={(checked) => setSelectAll(checked === true)}
               className="data-[state=checked]:bg-destructive data-[state=checked]:border-destructive"
